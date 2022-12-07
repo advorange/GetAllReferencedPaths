@@ -1,7 +1,5 @@
 ﻿using GetAllReferencedPaths.Gatherers;
 
-using System.Collections.Immutable;
-
 namespace GetAllReferencedPaths;
 
 public static class Program
@@ -39,24 +37,6 @@ public static class Program
 			.ToList();
 	}
 
-	public static DirectoryInfo GetLongestSharedDirectory(
-		this IEnumerable<FileInfo> files)
-	{
-		var first = files.First().FullName;
-		var i = 0;
-		while (files.All(x => x.FullName.Length > i && x.FullName[i] == first[i]))
-		{
-			++i;
-		}
-
-		while (!Directory.Exists(first[..i]))
-		{
-			--i;
-		}
-
-		return new(first[..i]);
-	}
-
 	public static async Task Main()
 	{
 		var temp = new Arguments(
@@ -92,74 +72,5 @@ public static class Program
 
 			Console.WriteLine($"Copied: {relative} -> {destination}");
 		}
-	}
-}
-
-public record Arguments(
-	string BaseDirectory,
-	List<HashSet<string>> InterchangeableFileTypes,
-	string OutputDirectory,
-	List<string> RootDirectories,
-	List<string> SourceFiles
-);
-
-public record RuntimeArguments(
-	DirectoryInfo BaseDirectory,
-	IReadOnlyList<GathererBase> Gatherers,
-	DirectoryInfo Output,
-	IReadOnlyList<DirectoryInfo> Roots,
-	IReadOnlyList<FileInfo> Sources
-)
-{
-	public static RuntimeArguments Create(Arguments args)
-	{
-		var roots = args.RootDirectories
-			.Select(x => Path.Combine(args.BaseDirectory, x))
-			.Prepend(args.BaseDirectory)
-			.Select(x => new DirectoryInfo(x))
-			.ToImmutableArray();
-		var sources = args.SourceFiles
-			.SelectMany(x =>
-			{
-				var sources = new HashSet<string>()
-				{
-					x
-				};
-
-				var fileExtension = Path.GetExtension(x);
-				foreach (var extensions in args.InterchangeableFileTypes)
-				{
-					if (extensions.Contains(fileExtension))
-					{
-						foreach (var extension in extensions)
-						{
-							sources.Add(Path.ChangeExtension(x, extension));
-						}
-					}
-				}
-
-				return sources;
-			})
-			.SelectMany(x => GathererBase.RootFile(roots, x))
-			.ToImmutableArray();
-		var baseDirectory = new DirectoryInfo(
-			args.BaseDirectory
-		);
-		var output = new DirectoryInfo(
-			Path.Combine(args.BaseDirectory, args.OutputDirectory)
-		);
-		var gatherers = new GathererBase[]
-		{
-			new JsonGatherer(roots),
-			new RegexGatherer(roots),
-		}.ToImmutableArray();
-
-		return new(
-			BaseDirectory: baseDirectory,
-			Gatherers: gatherers,
-			Output: output,
-			Roots: roots,
-			Sources: sources
-		);
 	}
 }
