@@ -14,17 +14,18 @@ public sealed class RegexGatherer : GathererBase
 	}
 
 	public override Task<List<string>> GetStringsAsync(
-		FileInfo file,
+		FileInfo source,
 		CancellationToken cancellationToken = default)
 	{
 		try
 		{
 			var strings = new List<string>();
-			foreach (var line in File.ReadLines(file.FullName))
+			foreach (var line in File.ReadLines(source.FullName))
 			{
 				var matches = _StringRegex.Matches(line);
 				for (var i = 0; i < matches.Count; ++i)
 				{
+					// quotes are included in the regex match, skip them
 					strings.Add(matches[i].Value[1..^1]);
 				}
 			}

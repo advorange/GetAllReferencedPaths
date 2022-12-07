@@ -9,12 +9,12 @@ public sealed class JsonGatherer : GathererBase
 	}
 
 	public override async Task<List<string>> GetStringsAsync(
-		FileInfo file,
+		FileInfo source,
 		CancellationToken cancellationToken = default)
 	{
 		try
 		{
-			using var fs = file.OpenRead();
+			using var fs = source.OpenRead();
 			using var doc = await JsonDocument.ParseAsync(
 				utf8Json: fs,
 				cancellationToken: cancellationToken

@@ -9,40 +9,51 @@ public abstract class GathererBase
 		Roots = roots;
 	}
 
+	public static IEnumerable<FileInfo> RootFile(
+		IEnumerable<DirectoryInfo> roots,
+		string @string)
+	{
+		foreach (var root in roots)
+		{
+			FileInfo file;
+			try
+			{
+				var joined = Path.Join(root.FullName, @string);
+				if (!File.Exists(joined))
+				{
+					continue;
+				}
+
+				file = new FileInfo(joined);
+			}
+			catch
+			{
+				continue;
+			}
+
+			yield return file;
+		}
+	}
+
 	public abstract Task<List<string>> GetStringsAsync(
-		FileInfo file,
+		FileInfo source,
 		CancellationToken cancellationToken = default);
 
 	public virtual IEnumerable<FileInfo> RootFiles(
 		FileInfo source,
 		IEnumerable<string> strings)
 	{
-		foreach (var str in strings)
+		var roots = Roots.Append(source.Directory!);
+		foreach (var @string in strings)
 		{
 			// only treat strings with a dot in it as a potential path
-			if (!str.Contains('.'))
+			if (!@string.Contains('.'))
 			{
 				continue;
 			}
 
-			foreach (var root in Roots.Append(source.Directory!))
+			foreach (var file in RootFile(roots, @string))
 			{
-				FileInfo file;
-				try
-				{
-					var joined = Path.Join(root.FullName, str);
-					if (!File.Exists(joined))
-					{
-						continue;
-					}
-
-					file = new FileInfo(joined);
-				}
-				catch
-				{
-					continue;
-				}
-
 				yield return file;
 			}
 		}
