@@ -1,54 +1,44 @@
-﻿using System.Text.Json;
+﻿using GetAllReferencedPaths.Gatherers;
 
 namespace GetAllReferencedPaths;
 
 public static class Program
 {
-	public static IEnumerable<FileInfo> GetFiles(
-		IEnumerable<DirectoryInfo> roots,
-		IEnumerable<string> strings)
+	public static async Task<List<FileInfo>> GetFilesAsync(
+		this IEnumerable<GathererBase> gatherers,
+		IEnumerable<FileInfo> sources,
+		CancellationToken cancellationToken = default)
 	{
-		foreach (var str in strings)
+		var alreadyProcessed = new HashSet<string>();
+		var needsProcessing = new Stack<FileInfo>(sources);
+		while (needsProcessing.TryPop(out var source))
 		{
-			// only treat strings with a dot in it as a potential path
-			if (!str.Contains('.'))
+			if (!alreadyProcessed.Add(Path.GetFullPath(source.FullName)))
 			{
 				continue;
 			}
 
-			foreach (var root in roots)
+			foreach (var gatherer in gatherers)
 			{
-				FileInfo file;
-				try
+				var strings = await gatherer.GetStringsAsync(
+					source,
+					cancellationToken
+				).ConfigureAwait(false);
+				foreach (var foundFile in gatherer.RootFiles(source, strings))
 				{
-					var joined = Path.Join(root.FullName, str);
-					if (!File.Exists(joined))
-					{
-						continue;
-					}
-
-					file = new FileInfo(joined);
+					needsProcessing.Push(foundFile);
 				}
-				catch
-				{
-					continue;
-				}
-
-				yield return file;
 			}
 		}
+
+		return alreadyProcessed
+			.OrderBy(x => x)
+			.Select(x => new FileInfo(x))
+			.ToList();
 	}
 
-	public static async Task<IEnumerable<FileInfo>> GetFilesAsync(
-		IEnumerable<DirectoryInfo> roots,
-		FileInfo file,
-		CancellationToken cancellationToken = default)
-	{
-		var strings = await GetStringsAsync(file, cancellationToken).ConfigureAwait(false);
-		return GetFiles(roots.Append(file.Directory!), strings);
-	}
-
-	public static DirectoryInfo GetLongestSharedDirectory(IEnumerable<FileInfo> files)
+	public static DirectoryInfo GetLongestSharedDirectory(
+		this IEnumerable<FileInfo> files)
 	{
 		var first = files.First().FullName;
 		var i = 0;
@@ -63,63 +53,6 @@ public static class Program
 		}
 
 		return new(first[..i]);
-	}
-
-	public static IEnumerable<string> GetStrings(JsonElement element)
-	{
-		switch (element.ValueKind)
-		{
-			case JsonValueKind.Object:
-				foreach (var property in element.EnumerateObject())
-				{
-					foreach (var e in GetStrings(property.Value))
-					{
-						yield return e;
-					}
-				}
-				break;
-
-			case JsonValueKind.Array:
-				foreach (var item in element.EnumerateArray())
-				{
-					foreach (var e in GetStrings(item))
-					{
-						yield return e;
-					}
-				}
-				break;
-
-			case JsonValueKind.String:
-				yield return element.GetString()!;
-				break;
-
-			case JsonValueKind.Undefined:
-			case JsonValueKind.Number:
-			case JsonValueKind.True:
-			case JsonValueKind.False:
-			case JsonValueKind.Null:
-				break;
-		}
-	}
-
-	public static async Task<IEnumerable<string>> GetStringsAsync(
-		FileInfo file,
-		CancellationToken cancellationToken = default)
-	{
-		try
-		{
-			using var fs = file.OpenRead();
-			using var doc = await JsonDocument.ParseAsync(
-				utf8Json: fs,
-				cancellationToken: cancellationToken
-			);
-
-			return GetStrings(doc.RootElement).ToList();
-		}
-		catch
-		{
-			return Array.Empty<string>();
-		}
 	}
 
 	public static async Task Main()
@@ -137,42 +70,29 @@ public static class Program
 				new(root),
 			}
 		);
-
-		var alreadyProcessed = new HashSet<string>();
-		var needsProcessing = new Stack<FileInfo>(args.Files);
-		while (needsProcessing.TryPop(out var file))
+		var gatherers = new GathererBase[]
 		{
-			if (!alreadyProcessed.Add(Path.GetFullPath(file.FullName)))
-			{
-				continue;
-			}
+			new JsonGatherer(args.Roots),
+			new RegexGatherer(args.Roots),
+		};
 
-			var foundFiles = await GetFilesAsync(args.Roots, file).ConfigureAwait(false);
-			foreach (var foundFile in foundFiles)
-			{
-				needsProcessing.Push(foundFile);
-			}
-		}
-
-		var files = alreadyProcessed
-			.OrderBy(x => x)
-			.Select(x => new FileInfo(x))
-			.ToList();
-		var directory = GetLongestSharedDirectory(files);
-		foreach (var file in files)
+		var files = await gatherers.GetFilesAsync(args.Files).ConfigureAwait(false);
+		var common = GetLongestSharedDirectory(files);
+		var time = DateTime.Now.ToString("s").Replace(':', '.');
+		foreach (var source in files)
 		{
-			var relative = Path.GetRelativePath(directory.FullName, file.FullName);
-			var destination = Path.Combine(args.Output.FullName, relative);
+			var relative = Path.GetRelativePath(common.FullName, source.FullName);
+			var destination = Path.Combine(args.Output.FullName, time, relative);
 
-			var dir = Path.GetDirectoryName(destination)!;
-			Directory.CreateDirectory(dir);
-			file.CopyTo(destFileName: destination, overwrite: true);
+			Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+			source.CopyTo(destination);
+
 			Console.WriteLine($"Copied: {relative} -> {destination}");
 		}
 	}
 }
 
-public record Arguments(
+public record struct Arguments(
 	IReadOnlyList<FileInfo> Files,
 	DirectoryInfo Output,
 	IReadOnlyList<DirectoryInfo> Roots
