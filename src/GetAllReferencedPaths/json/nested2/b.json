@@ -1,0 +1,9 @@
+{
+	"joe": "image.png",
+	"mama": "nested/c.json",
+	"asdf": {
+		"123": {
+			"456": "nested2/d.json"
+		}
+	}
+}
