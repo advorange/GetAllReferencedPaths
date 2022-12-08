@@ -6,12 +6,11 @@ using GetAllReferencedPaths.UI.ViewModels;
 using GetAllReferencedPaths.UI.Views;
 
 namespace GetAllReferencedPaths.UI;
-public partial class App : Application
+
+public sealed class App : Application
 {
 	public override void Initialize()
-	{
-		AvaloniaXamlLoader.Load(this);
-	}
+		=> AvaloniaXamlLoader.Load(this);
 
 	public override void OnFrameworkInitializationCompleted()
 	{
