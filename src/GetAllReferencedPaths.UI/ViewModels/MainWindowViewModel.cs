@@ -1,6 +1,5 @@
 using ReactiveUI;
 
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Reactive;
 using System.Threading.Tasks;
@@ -9,11 +8,7 @@ namespace GetAllReferencedPaths.UI.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-	public Arguments Args { get; }
-	public ObservableCollection<string> Strings { get; } = new()
-	{
-		"123",
-	};
+	public ArgumentsViewModel Args { get; }
 
 	#region Commands
 	public ReactiveCommand<Unit, Unit> GetPaths { get; }
@@ -23,13 +18,17 @@ public class MainWindowViewModel : ViewModelBase
 	{
 		GetPaths = ReactiveCommand.CreateFromTask(GetPathsAsync);
 
-		Args = new Arguments(
+		Args = new(new Arguments(
 			BaseDirectory: Directory.GetCurrentDirectory(),
 			InterchangeableFileTypes: new()
 			{
 				new()
 				{
 					".jsim", ".jresource"
+				},
+				new()
+				{
+					".xyz", ".xyz2"
 				},
 			},
 			OutputDirectory: "../ReferencedFilesOutput",
@@ -41,7 +40,7 @@ public class MainWindowViewModel : ViewModelBase
 			{
 				"./input.jsim"
 			}
-		);
+		));
 	}
 
 	private Task GetPathsAsync()

@@ -1,31 +1,82 @@
 <Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:GetAllReferencedPaths.UI.ViewModels"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="GetAllReferencedPaths.UI.Views.MainWindow"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="GetAllReferencedPaths.UI">
+				xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+				xmlns:vm="using:GetAllReferencedPaths.UI.ViewModels"
+				xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+				xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+				mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+				x:Class="GetAllReferencedPaths.UI.Views.MainWindow"
+				Icon="/Assets/avalonia-logo.ico"
+				Title="GetAllReferencedPaths.UI">
 
 	<Design.DataContext>
 		<vm:MainWindowViewModel />
 	</Design.DataContext>
 
-	<Border Padding="15">
-		<Grid ColumnDefinitions="5*,5*">
-			<UniformGrid Grid.Column="0">
-				<HeaderedContentControl Header="Base Directory">
-					<TextBox Text="{Binding Args.BaseDirectory}" TextWrapping="NoWrap" />
-				</HeaderedContentControl>
-				<HeaderedContentControl Header="Output Directory">
-					<TextBox Text="{Binding Args.OutputDirectory}" TextWrapping="NoWrap" />
-				</HeaderedContentControl>
-				<HeaderedContentControl Header="Root Directories">
-					<ListBox Items="{Binding Strings}" />
-				</HeaderedContentControl>
-				<Button Content="Button" Command="{Binding GetPaths}" />
-			</UniformGrid>
-		</Grid>
-	</Border>
+	<Grid ColumnDefinitions="5*,5*">
+		<Border Grid.Column="0" Padding="15">
+			<Grid RowDefinitions="1*,2*,2*,1*">
+				<!-- Single string values -->
+				<UniformGrid Grid.Row="0" Columns="1">
+					<HeaderedContentControl Header="Base Directory">
+						<TextBox Text="{Binding Args.BaseDirectory}" TextWrapping="NoWrap" />
+					</HeaderedContentControl>
+					<HeaderedContentControl Header="Output Directory">
+						<TextBox Text="{Binding Args.OutputDirectory}" TextWrapping="NoWrap" />
+					</HeaderedContentControl>
+				</UniformGrid>
+
+				<!-- Multiple strings in a list -->
+				<UniformGrid Grid.Row="1" Rows="1">
+					<HeaderedContentControl Header="Root Directories">
+						<ItemsRepeater Items="{Binding Args.RootDirectories}">
+							<ItemsRepeater.ItemTemplate>
+								<DataTemplate>
+									<TextBox Text="{Binding Value}" />
+								</DataTemplate>
+							</ItemsRepeater.ItemTemplate>
+						</ItemsRepeater>
+					</HeaderedContentControl>
+					<HeaderedContentControl Header="Source Files">
+						<ItemsRepeater Items="{Binding Args.SourceFiles}">
+							<ItemsRepeater.ItemTemplate>
+								<DataTemplate>
+									<TextBox Text="{Binding Value}" />
+								</DataTemplate>
+							</ItemsRepeater.ItemTemplate>
+						</ItemsRepeater>
+					</HeaderedContentControl>
+				</UniformGrid>
+
+				<!-- Multiple lists of strings in a list -->
+				<UniformGrid Grid.Row="2" Columns="1">
+					<HeaderedContentControl Header="Interchangeable File Types">
+						<ItemsRepeater Items="{Binding Args.InterchangeableFileTypes}">
+							<ItemsRepeater.Layout>
+								<StackLayout Spacing="10" />
+							</ItemsRepeater.Layout>
+							<ItemsRepeater.ItemTemplate>
+								<DataTemplate>
+									<ItemsRepeater Items="{Binding}">
+										<ItemsRepeater.Layout>
+											<StackLayout Orientation="Horizontal" />
+										</ItemsRepeater.Layout>
+										<ItemsRepeater.ItemTemplate>
+											<DataTemplate>
+												<TextBox Text="{Binding Value}" />
+											</DataTemplate>
+										</ItemsRepeater.ItemTemplate>
+									</ItemsRepeater>
+								</DataTemplate>
+							</ItemsRepeater.ItemTemplate>
+						</ItemsRepeater>
+					</HeaderedContentControl>
+				</UniformGrid>
+
+				<!-- Button bar -->
+				<UniformGrid Grid.Row="3" Rows="1">
+					<Button Content="Get Paths" Command="{Binding GetPaths}" />
+				</UniformGrid>
+			</Grid>
+		</Border>
+	</Grid>
 </Window>
