@@ -13,9 +13,12 @@ public sealed class RegexGatherer : GathererBase
 	{
 	}
 
-	public override Task<List<string>> GetStringsAsync(
+	public override Task<Result<List<string>>> GetStringsAsync(
 		FileInfo source,
 		CancellationToken cancellationToken = default)
+		=> Task.FromResult(GetStrings(source));
+
+	private static Result<List<string>> GetStrings(FileInfo source)
 	{
 		try
 		{
@@ -29,11 +32,11 @@ public sealed class RegexGatherer : GathererBase
 					strings.Add(matches[i].Value[1..^1]);
 				}
 			}
-			return Task.FromResult(strings);
+			return new(strings);
 		}
 		catch
 		{
-			return Task.FromResult(new List<string>());
+			return new("Unable to read lines.");
 		}
 	}
 }

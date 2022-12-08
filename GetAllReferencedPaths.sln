@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GetAllReferencedPaths", "src\GetAllReferencedPaths\GetAllReferencedPaths.csproj", "{9070DCFF-F315-4EFB-AB95-D097FE97546E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GetAllReferencedPaths", "src\GetAllReferencedPaths\GetAllReferencedPaths.csproj", "{9070DCFF-F315-4EFB-AB95-D097FE97546E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GetAllReferencedPaths.UI", "src\GetAllReferencedPaths.UI\GetAllReferencedPaths.UI.csproj", "{DA45C7ED-E15B-42FF-B57B-EE41A0163CE0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{9070DCFF-F315-4EFB-AB95-D097FE97546E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9070DCFF-F315-4EFB-AB95-D097FE97546E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9070DCFF-F315-4EFB-AB95-D097FE97546E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA45C7ED-E15B-42FF-B57B-EE41A0163CE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA45C7ED-E15B-42FF-B57B-EE41A0163CE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA45C7ED-E15B-42FF-B57B-EE41A0163CE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA45C7ED-E15B-42FF-B57B-EE41A0163CE0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
