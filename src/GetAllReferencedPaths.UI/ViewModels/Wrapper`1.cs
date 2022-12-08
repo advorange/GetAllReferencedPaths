@@ -11,4 +11,9 @@ public class Wrapper<T> : ReactiveObject
 		get => _Value;
 		set => this.RaiseAndSetIfChanged(ref _Value, value);
 	}
+
+	public Wrapper(T value)
+	{
+		Value = value;
+	}
 }
