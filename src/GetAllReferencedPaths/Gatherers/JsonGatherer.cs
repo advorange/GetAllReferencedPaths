@@ -8,7 +8,7 @@ public sealed class JsonGatherer : GathererBase
 	{
 	}
 
-	public override async Task<List<string>> GetStringsAsync(
+	public override async Task<Result<List<string>>> GetStringsAsync(
 		FileInfo source,
 		CancellationToken cancellationToken = default)
 	{
@@ -20,11 +20,11 @@ public sealed class JsonGatherer : GathererBase
 				cancellationToken: cancellationToken
 			);
 
-			return GetStrings(doc.RootElement).ToList();
+			return new(GetStrings(doc.RootElement).ToList());
 		}
 		catch
 		{
-			return new List<string>();
+			return new("Unable to parse JSON.");
 		}
 	}
 

@@ -1,42 +1,7 @@
-﻿using GetAllReferencedPaths.Gatherers;
-
-namespace GetAllReferencedPaths;
+﻿namespace GetAllReferencedPaths;
 
 public static class Program
 {
-	public static async Task<List<FileInfo>> GetFilesAsync(
-		this IEnumerable<GathererBase> gatherers,
-		IEnumerable<FileInfo> sources,
-		CancellationToken cancellationToken = default)
-	{
-		var alreadyProcessed = new HashSet<string>();
-		var filesToProcess = new Stack<FileInfo>(sources);
-		while (filesToProcess.TryPop(out var file))
-		{
-			if (!alreadyProcessed.Add(Path.GetFullPath(file.FullName)))
-			{
-				continue;
-			}
-
-			foreach (var gatherer in gatherers)
-			{
-				var strings = await gatherer.GetStringsAsync(
-					file,
-					cancellationToken
-				).ConfigureAwait(false);
-				foreach (var rootedFile in gatherer.RootFiles(file, strings))
-				{
-					filesToProcess.Push(rootedFile);
-				}
-			}
-		}
-
-		return alreadyProcessed
-			.OrderBy(x => x)
-			.Select(x => new FileInfo(x))
-			.ToList();
-	}
-
 	public static async Task Main()
 	{
 		var temp = new Arguments(
@@ -60,7 +25,35 @@ public static class Program
 		);
 		var args = RuntimeArguments.Create(temp);
 
-		var files = await args.Gatherers.GetFilesAsync(args.Sources).ConfigureAwait(false);
+		var alreadyProcessed = new HashSet<string>();
+		var filesToProcess = new Stack<FileInfo>(args.Sources);
+		while (filesToProcess.TryPop(out var file))
+		{
+			if (!alreadyProcessed.Add(Path.GetFullPath(file.FullName)))
+			{
+				continue;
+			}
+
+			foreach (var gatherer in args.Gatherers)
+			{
+				var result = await gatherer.GetStringsAsync(file).ConfigureAwait(false);
+				if (!result.IsSuccess)
+				{
+					continue;
+				}
+
+				foreach (var rootedFile in gatherer.RootFiles(file, result.Value))
+				{
+					filesToProcess.Push(rootedFile);
+				}
+			}
+		}
+
+		var files = alreadyProcessed
+			.OrderBy(x => x)
+			.Select(x => new FileInfo(x))
+			.ToList();
+
 		var time = DateTime.Now.ToString("s").Replace(':', '.');
 		foreach (var source in files)
 		{

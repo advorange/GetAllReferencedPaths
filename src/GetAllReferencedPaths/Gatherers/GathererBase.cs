@@ -35,7 +35,7 @@ public abstract class GathererBase
 		}
 	}
 
-	public abstract Task<List<string>> GetStringsAsync(
+	public abstract Task<Result<List<string>>> GetStringsAsync(
 		FileInfo source,
 		CancellationToken cancellationToken = default);
 
