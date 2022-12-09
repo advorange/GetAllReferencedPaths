@@ -42,8 +42,8 @@
 		<Style Selector="ContentControl.rel-path">
 			<Setter Property="ContentTemplate">
 				<DataTemplate>
-					<Expander Name="rExpander" Padding="0" HorizontalAlignment="Stretch"
-										MinHeight="{Binding ElementName=rTextBox, Path=MinHeight}">
+					<Expander Name="rExpander" Padding="0" MinHeight="0"
+										HorizontalAlignment="Stretch">
 						<Expander.IsExpanded>
 							<MultiBinding Converter="{x:Static BoolConverters.Or}">
 								<Binding ElementName="rExpander" Path="IsExpanded" />
@@ -61,7 +61,7 @@
 									<DataTemplate>
 										<Border BorderThickness="1"
 														BorderBrush="{Binding IsValid, Converter={x:Static conv:BrushConverters.FileExists}}">
-											<TextBox IsEnabled="False" Text="{Binding Path}" />
+											<TextBlock Text="{Binding Path}" />
 										</Border>
 									</DataTemplate>
 								</ItemsRepeater.ItemTemplate>
