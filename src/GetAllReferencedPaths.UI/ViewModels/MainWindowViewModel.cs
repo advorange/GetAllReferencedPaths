@@ -19,7 +19,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 	private readonly Window _Window;
 
 	public ArgumentsViewModel Args { get; }
-	public ObservableCollection<CopyFileViewModel> FilesToProcess { get; } = new();
+	public ObservableCollection<CopyFileViewModel> FilesToCopy { get; } = new();
 
 	#region Commands
 	public ReactiveCommand<Unit, Unit> AddRootDirectory { get; }
@@ -57,13 +57,13 @@ public sealed class MainWindowViewModel : ViewModelBase
 
 	private Task ClearPathsAsync()
 	{
-		FilesToProcess.Clear();
+		FilesToCopy.Clear();
 		return Task.CompletedTask;
 	}
 
 	private async Task CopyFilesAsync()
 	{
-		foreach (var file in FilesToProcess)
+		foreach (var file in FilesToCopy)
 		{
 			var destination = Path.Combine(
 				Args.OutputDirectory.Value!,
@@ -78,9 +78,11 @@ public sealed class MainWindowViewModel : ViewModelBase
 
 	private async Task GetPathsAsync()
 	{
-		FilesToProcess.Clear();
+		FilesToCopy.Clear();
 
 		var args = RuntimeArguments.Create(Args.ToModel());
+
+		var time = DateTime.Now;
 		var alreadyProcessed = new HashSet<string>();
 		var filesToProcess = new Stack<FileInfo>(args.Sources);
 		while (filesToProcess.TryPop(out var file))
@@ -101,14 +103,9 @@ public sealed class MainWindowViewModel : ViewModelBase
 				foreach (var rootedFile in gatherer.RootFiles(file, result.Value))
 				{
 					filesToProcess.Push(rootedFile);
+					FilesToCopy.Add(new(args, time, rootedFile));
 				}
 			}
-		}
-
-		var time = DateTime.Now;
-		foreach (var file in alreadyProcessed.OrderBy(x => x))
-		{
-			FilesToProcess.Add(new(args, time, new(file)));
 		}
 	}
 

@@ -43,7 +43,7 @@
 			<Setter Property="ContentTemplate">
 				<DataTemplate>
 					<Expander Name="rExpander" Padding="0" MinHeight="0"
-										HorizontalAlignment="Stretch">
+							HorizontalAlignment="Stretch">
 						<Expander.IsExpanded>
 							<MultiBinding Converter="{x:Static BoolConverters.Or}">
 								<Binding ElementName="rExpander" Path="IsExpanded" />
@@ -77,7 +77,7 @@
 			<Grid RowDefinitions="*,auto,auto">
 				<!-- Settings Only Modifiable Before Searching -->
 				<ScrollViewer Grid.Row="0">
-					<StackPanel IsEnabled="{Binding !FilesToProcess.Count}">
+					<StackPanel IsEnabled="{Binding !FilesToCopy.Count}">
 						<HeaderedContentControl Classes="input-option" Header="Base Directory">
 							<Grid ColumnDefinitions="*,auto">
 								<TextBox Text="{Binding Args.BaseDirectory.Value}" TextWrapping="NoWrap" />
@@ -135,9 +135,9 @@
 				<!-- Button Ribbon -->
 				<UniformGrid Grid.Row="2" Rows="1">
 					<Button Content="Get Paths" Command="{Binding GetPaths}"
-									IsVisible="{Binding !FilesToProcess.Count}" />
+									IsVisible="{Binding !FilesToCopy.Count}" />
 					<Button Content="Clear Paths" Command="{Binding ClearPaths}"
-									IsVisible="{Binding FilesToProcess.Count}" />
+									IsVisible="{Binding FilesToCopy.Count}" />
 				</UniformGrid>
 			</Grid>
 		</Border>
@@ -145,41 +145,63 @@
 		<!-- Output -->
 		<Border Grid.Column="1">
 			<ScrollViewer>
-				<ItemsRepeater Items="{Binding FilesToProcess}">
+				<ItemsRepeater Items="{Binding FilesToCopy}">
 					<ItemsRepeater.ItemTemplate>
 						<DataTemplate>
 							<Border BorderThickness="1"
 											BorderBrush="{DynamicResource TextControlBorderBrush}">
 								<StackPanel>
 									<HeaderedContentControl Header="Source">
-										<TextBox Text="{Binding Source}" />
+										<TextBlock Text="{Binding Source}" />
 									</HeaderedContentControl>
 									<HeaderedContentControl Header="Destination">
-										<TextBox>
-											<TextBox.Text>
+										<TextBlock>
+											<TextBlock.Text>
 												<MultiBinding Converter="{x:Static conv:PathConverters.Join}">
 													<Binding ElementName="Me" Path="DataContext.Args.BaseDirectory.Value" />
 													<Binding ElementName="Me" Path="DataContext.Args.OutputDirectory.Value" />
 													<Binding Path="Time" />
 													<Binding Path="Relative" />
 												</MultiBinding>
-											</TextBox.Text>
-										</TextBox>
+											</TextBlock.Text>
+										</TextBlock>
 									</HeaderedContentControl>
 								</StackPanel>
 							</Border>
 						</DataTemplate>
 					</ItemsRepeater.ItemTemplate>
-
-					<ItemsRepeater.Styles>
-						<Style Selector="TextBox">
-							<Setter Property="BorderThickness" Value="0" />
-							<Setter Property="IsReadOnly" Value="True" />
-							<Setter Property="TextWrapping" Value="Wrap" />
-						</Style>
-					</ItemsRepeater.Styles>
 				</ItemsRepeater>
 			</ScrollViewer>
 		</Border>
 	</Grid>
 </Window>
+
+<!--
+		<Window.DataTemplates>
+			<TreeDataTemplate DataType="vm:RootDirectoryViewModel"
+												ItemsSource="{Binding Paths}">
+				<TextBox Text="{Binding Value}">
+					<TextBox.IsFocused>
+						<Binding Path="IsFocused" Mode="OneWayToSource" />
+					</TextBox.IsFocused>
+				</TextBox>
+			</TreeDataTemplate>
+
+			<DataTemplate DataType="vm:PathViewModel">
+				<TextBlock Text="{Binding Path}"
+									 Background="{Binding IsValid, Converter={x:Static conv:BrushConverters.FileExists}}" />
+			</DataTemplate>
+		</Window.DataTemplates>
+
+		<Style Selector="TreeView.rel-paths > TreeViewItem">
+			<Setter Property="IsExpanded">
+				<MultiBinding Converter="{x:Static BoolConverters.Or}">
+					<Binding Path="IsFocused" />
+					<Binding Path="$self.IsExpanded" />
+				</MultiBinding>
+			</Setter>
+			<Setter Property="Padding" Value="0" />
+			<Setter Property="MinHeight" Value="0" />
+			<Setter Property="HorizontalAlignment" Value="Stretch" />
+		</Style>
+-->
