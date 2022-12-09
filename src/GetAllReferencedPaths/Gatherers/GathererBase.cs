@@ -9,30 +9,41 @@ public abstract class GathererBase
 		Roots = roots;
 	}
 
-	public static IEnumerable<FileInfo> RootFile(
+	public static List<FileInfo> RootFile(
 		IEnumerable<DirectoryInfo> roots,
-		string @string)
+		string @string,
+		bool existingFilesOnly = true)
 	{
+		var output = new HashSet<string>();
 		foreach (var root in roots)
 		{
-			FileInfo file;
 			try
 			{
-				var joined = Path.Join(root.FullName, @string);
-				if (!File.Exists(joined))
+				if (!string.IsNullOrWhiteSpace(@string))
 				{
-					continue;
+					foreach (var file in Directory.EnumerateFiles(root.FullName, @string))
+					{
+						output.Add(Path.GetFullPath(file));
+					}
 				}
-
-				file = new FileInfo(joined);
 			}
 			catch
 			{
-				continue;
 			}
 
-			yield return file;
+			try
+			{
+				var file = Path.Join(root.FullName, @string);
+				if (!existingFilesOnly || File.Exists(file))
+				{
+					output.Add(Path.GetFullPath(file));
+				}
+			}
+			catch
+			{
+			}
 		}
+		return output.Select(x => new FileInfo(x)).ToList();
 	}
 
 	public abstract Task<Result<List<string>>> GetStringsAsync(

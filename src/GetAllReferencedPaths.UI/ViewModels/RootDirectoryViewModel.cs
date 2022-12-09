@@ -12,9 +12,9 @@ public sealed class RootDirectoryViewModel : PathCollectionViewModel
 	{
 		var dirChange = baseDirectory.WhenAnyValue(x => x.Value);
 		var valChange = this.WhenAnyValue(x => x.Value);
-		dirChange.CombineLatest(valChange).Select(x =>
+		dirChange.CombineLatest(valChange).Select(tuple =>
 		{
-			var (dir, val) = x;
+			var (dir, val) = tuple;
 			return new[] { PathViewModel.RootDirectory(Path.Combine(dir, val)) };
 		}).BindTo(this, x => x.Paths);
 	}
