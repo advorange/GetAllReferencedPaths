@@ -1,3 +1,6 @@
+using Avalonia.Controls;
+using Avalonia.Platform.Storage.FileIO;
+
 using ReactiveUI;
 
 using System;
@@ -13,6 +16,8 @@ namespace GetAllReferencedPaths.UI.ViewModels;
 
 public sealed class MainWindowViewModel : ViewModelBase
 {
+	private readonly Window _Window;
+
 	public ArgumentsViewModel Args { get; }
 	public ObservableCollection<CopyFileViewModel> FilesToProcess { get; } = new();
 
@@ -22,10 +27,12 @@ public sealed class MainWindowViewModel : ViewModelBase
 	public ReactiveCommand<Unit, Unit> ClearPaths { get; }
 	public ReactiveCommand<Unit, Unit> CopyFiles { get; }
 	public ReactiveCommand<Unit, Unit> GetPaths { get; }
+	public ReactiveCommand<Unit, Unit> SelectBaseDirectory { get; }
 	#endregion Commands
 
-	public MainWindowViewModel(Arguments args)
+	public MainWindowViewModel(Window window, Arguments args)
 	{
+		_Window = window;
 		Args = new(args);
 
 		AddRootDirectory = ReactiveCommand.CreateFromTask(AddRootDirectoryAsync);
@@ -33,6 +40,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 		ClearPaths = ReactiveCommand.CreateFromTask(ClearPathsAsync);
 		CopyFiles = ReactiveCommand.CreateFromTask(CopyFilesAsync);
 		GetPaths = ReactiveCommand.CreateFromTask(GetPathsAsync);
+		SelectBaseDirectory = ReactiveCommand.CreateFromTask(SelectBaseDirectoryAsync);
 	}
 
 	private Task AddRootDirectoryAsync()
@@ -102,5 +110,16 @@ public sealed class MainWindowViewModel : ViewModelBase
 		{
 			FilesToProcess.Add(new(args, time, new(file)));
 		}
+	}
+
+	private async Task SelectBaseDirectoryAsync()
+	{
+		var path = await _Window.GetDirectoryAsync(Args.BaseDirectory.Value).ConfigureAwait(true);
+		if (string.IsNullOrWhiteSpace(path))
+		{
+			return;
+		}
+
+		Args.BaseDirectory.Value = path;
 	}
 }

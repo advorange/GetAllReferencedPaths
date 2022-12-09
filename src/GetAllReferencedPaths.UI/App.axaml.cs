@@ -41,10 +41,9 @@ public sealed class App : Application
 
 		if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
 		{
-			desktop.MainWindow = new MainWindow
-			{
-				DataContext = new MainWindowViewModel(args),
-			};
+			var window = new MainWindow();
+			window.DataContext = new MainWindowViewModel(window, args);
+			desktop.MainWindow = window;
 		}
 
 		base.OnFrameworkInitializationCompleted();

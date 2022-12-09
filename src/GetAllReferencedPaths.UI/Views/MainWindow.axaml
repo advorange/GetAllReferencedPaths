@@ -79,7 +79,11 @@
 				<ScrollViewer Grid.Row="0">
 					<StackPanel IsEnabled="{Binding !FilesToProcess.Count}">
 						<HeaderedContentControl Classes="input-option" Header="Base Directory">
-							<TextBox Text="{Binding Args.BaseDirectory.Value}" TextWrapping="NoWrap" />
+							<Grid ColumnDefinitions="*,auto">
+								<TextBox Text="{Binding Args.BaseDirectory.Value}" TextWrapping="NoWrap" />
+								<Button Grid.Column="1" VerticalAlignment="Stretch" Content="Select"
+												Command="{Binding SelectBaseDirectory}" />
+							</Grid>
 						</HeaderedContentControl>
 
 						<StackPanel Classes="input-option">

@@ -1,12 +1,6 @@
 ﻿using DynamicData;
 using DynamicData.Binding;
 
-using GetAllReferencedPaths.Gatherers;
-
-using ReactiveUI;
-
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -18,11 +12,11 @@ public sealed class SourceFileViewModel : PathCollectionViewModel
 {
 	public SourceFileViewModel(ObservableCollection<RootDirectoryViewModel> roots, string value) : base(value)
 	{
-		var rootChange = roots
+		var rootsChange = roots
 			.ToObservableChangeSet()
 			.AutoRefresh(x => x.Paths)
 			.ToCollection();
-		BindToPaths(rootChange, (roots, val) =>
+		BindToPaths(rootsChange, (roots, val) =>
 		{
 			return roots.SelectMany(r =>
 			{
