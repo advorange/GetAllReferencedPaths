@@ -1,7 +1,5 @@
 ﻿using ReactiveUI;
 
-using System.Collections.ObjectModel;
-
 namespace GetAllReferencedPaths.UI.ViewModels;
 
 public class StringWrapper : ViewModelBase

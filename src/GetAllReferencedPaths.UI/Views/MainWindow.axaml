@@ -26,17 +26,16 @@
 			<Setter Property="ContentTemplate">
 				<DataTemplate>
 					<Border BorderBrush="Purple" BorderThickness="2">
-						<UniformGrid Columns="1">
+						<StackPanel>
 							<TextBox Text="{Binding Value}" />
-							<TextBox IsEnabled="False">
-								<TextBox.Text>
-									<MultiBinding Converter="{x:Static conv:PathConverters.Join}">
-										<Binding ElementName="Me" Path="DataContext.Args.BaseDirectory.Value" />
-										<Binding Path="Value" />
-									</MultiBinding>
-								</TextBox.Text>
-							</TextBox>
-						</UniformGrid>
+							<ItemsRepeater Items="{Binding Paths}">
+								<ItemsRepeater.ItemTemplate>
+									<DataTemplate>
+										<TextBox IsEnabled="False" Text="{Binding}" />
+									</DataTemplate>
+								</ItemsRepeater.ItemTemplate>
+							</ItemsRepeater>
+						</StackPanel>
 					</Border>
 				</DataTemplate>
 			</Setter>

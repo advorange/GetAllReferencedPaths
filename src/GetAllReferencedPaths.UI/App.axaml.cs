@@ -32,7 +32,8 @@ public sealed class App : Application
 			OutputDirectory: "../ReferencedFilesOutput",
 			RootDirectories: new()
 			{
-				"./sim"
+				"./sim",
+				"./game"
 			},
 			SourceFiles: new()
 			{
