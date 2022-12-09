@@ -1,54 +1,97 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
+using Avalonia.Threading;
+
+using DynamicData.Alias;
 
 using ReactiveUI;
 
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 
 namespace GetAllReferencedPaths.UI.ViewModels;
 
-public class MainWindowViewModel : ViewModelBase
+public sealed class MainWindowViewModel : ViewModelBase
 {
 	public ArgumentsViewModel Args { get; }
+	public ObservableCollection<CopyFileViewModel> FilesToProcess { get; } = new();
 
 	#region Commands
+	public ReactiveCommand<Unit, Unit> ClearPaths { get; }
+	public ReactiveCommand<Unit, Unit> CopyFiles { get; }
 	public ReactiveCommand<Unit, Unit> GetPaths { get; }
 	#endregion Commands
 
-	public MainWindowViewModel()
+	public MainWindowViewModel(Arguments args)
 	{
-		GetPaths = ReactiveCommand.CreateFromTask(GetPathsAsync);
+		Args = new(args);
 
-		Args = new(new Arguments(
-			BaseDirectory: Directory.GetCurrentDirectory(),
-			InterchangeableFileTypes: new()
-			{
-				new()
-				{
-					".jsim", ".jresource"
-				},
-				new()
-				{
-					".xyz", ".xyz2"
-				},
-			},
-			OutputDirectory: "../ReferencedFilesOutput",
-			RootDirectories: new()
-			{
-				"./sim"
-			},
-			SourceFiles: new()
-			{
-				"./input.jsim"
-			}
-		));
+		ClearPaths = ReactiveCommand.CreateFromTask(ClearPathsAsync);
+		CopyFiles = ReactiveCommand.CreateFromTask(CopyFilesAsync);
+		GetPaths = ReactiveCommand.CreateFromTask(GetPathsAsync);
 	}
 
-	private Task GetPathsAsync()
+	private Task ClearPathsAsync()
 	{
+		FilesToProcess.Clear();
 		return Task.CompletedTask;
+	}
+
+	private async Task CopyFilesAsync()
+	{
+		foreach (var file in FilesToProcess)
+		{
+			var destination = Path.Combine(
+				Args.OutputDirectory.Value!,
+				file.Time,
+				file.Relative
+			);
+			Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+			File.Copy(file.Source, destination);
+			Debug.WriteLine($"Copied: {file.Relative} -> {destination}");
+		}
+	}
+
+	private async Task GetPathsAsync()
+	{
+		FilesToProcess.Clear();
+
+		var args = RuntimeArguments.Create(Args.ToModel());
+		var alreadyProcessed = new HashSet<string>();
+		var filesToProcess = new Stack<FileInfo>(args.Sources);
+		while (filesToProcess.TryPop(out var file))
+		{
+			if (!alreadyProcessed.Add(Path.GetFullPath(file.FullName)))
+			{
+				continue;
+			}
+
+			foreach (var gatherer in args.Gatherers)
+			{
+				var result = await gatherer.GetStringsAsync(file).ConfigureAwait(true);
+				if (!result.IsSuccess)
+				{
+					continue;
+				}
+
+				foreach (var rootedFile in gatherer.RootFiles(file, result.Value))
+				{
+					filesToProcess.Push(rootedFile);
+				}
+			}
+		}
+
+		var time = DateTime.Now;
+		foreach (var file in alreadyProcessed.OrderBy(x => x))
+		{
+			FilesToProcess.Add(new(args, time, new(file)));
+		}
 	}
 }

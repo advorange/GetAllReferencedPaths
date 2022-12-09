@@ -5,6 +5,8 @@ using Avalonia.Markup.Xaml;
 using GetAllReferencedPaths.UI.ViewModels;
 using GetAllReferencedPaths.UI.Views;
 
+using System.IO;
+
 namespace GetAllReferencedPaths.UI;
 
 public sealed class App : Application
@@ -14,11 +16,35 @@ public sealed class App : Application
 
 	public override void OnFrameworkInitializationCompleted()
 	{
+		var args = new Arguments(
+			BaseDirectory: @"C:\Users\User\Source\Repos\GetAllReferencedPaths\src\GetAllReferencedPaths",
+			InterchangeableFileTypes: new()
+			{
+				new()
+				{
+					".jsim", ".jresource"
+				},
+				new()
+				{
+					".xyz", ".xyz2"
+				},
+			},
+			OutputDirectory: "../ReferencedFilesOutput",
+			RootDirectories: new()
+			{
+				"./sim"
+			},
+			SourceFiles: new()
+			{
+				"./input.jsim"
+			}
+		);
+
 		if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
 		{
 			desktop.MainWindow = new MainWindow
 			{
-				DataContext = new MainWindowViewModel(),
+				DataContext = new MainWindowViewModel(args),
 			};
 		}
 

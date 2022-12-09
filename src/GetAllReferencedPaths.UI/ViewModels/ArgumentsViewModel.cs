@@ -5,13 +5,13 @@ using System.Linq;
 
 namespace GetAllReferencedPaths.UI.ViewModels;
 
-public sealed class ArgumentsViewModel : ReactiveObject
+public sealed class ArgumentsViewModel : ViewModelBase
 {
-	public Wrapper<string> BaseDirectory { get; set; } = new("");
-	public ObservableCollection<ObservableCollection<Wrapper<string>>> InterchangeableFileTypes { get; set; } = new();
-	public Wrapper<string> OutputDirectory { get; set; } = new("");
-	public ObservableCollection<Wrapper<string>> RootDirectories { get; set; } = new();
-	public ObservableCollection<Wrapper<string>> SourceFiles { get; set; } = new();
+	public StringWrapper BaseDirectory { get; set; }
+	public ObservableCollection<ObservableCollection<StringWrapper>> InterchangeableFileTypes { get; set; } = new();
+	public StringWrapper OutputDirectory { get; set; }
+	public ObservableCollection<StringWrapper> RootDirectories { get; set; } = new();
+	public ObservableCollection<StringWrapper> SourceFiles { get; set; } = new();
 
 	public ArgumentsViewModel(Arguments args)
 	{
@@ -29,7 +29,7 @@ public sealed class ArgumentsViewModel : ReactiveObject
 
 		foreach (var set in args.InterchangeableFileTypes)
 		{
-			var list = new ObservableCollection<Wrapper<string>>();
+			var list = new ObservableCollection<StringWrapper>();
 			foreach (var item in set)
 			{
 				list.Add(new(item));

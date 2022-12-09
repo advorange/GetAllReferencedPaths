@@ -14,16 +14,42 @@
 		<vm:MainWindowViewModel />
 	</Design.DataContext>
 
-	<Grid ColumnDefinitions="5*,5*">
-		<Border Grid.Column="0" Padding="15">
-			<Grid RowDefinitions="*,auto">
-				<StackPanel Grid.Row="0">
+	<Window.Styles>
+		<Style Selector="ItemsRepeater.rel-paths">
+			<Setter Property="ItemTemplate">
+				<DataTemplate>
+					<ContentControl Classes="rel-path" Content="{Binding}" />
+				</DataTemplate>
+			</Setter>
+		</Style>
+		<Style Selector="ContentControl.rel-path">
+			<Setter Property="ContentTemplate">
+				<DataTemplate>
+					<Border BorderBrush="Purple" BorderThickness="2">
+						<UniformGrid Columns="1">
+							<TextBox Text="{Binding Value}" />
+							<TextBox IsEnabled="False">
+								<TextBox.Text>
+									<MultiBinding Converter="{x:Static conv:PathConverters.Join}">
+										<Binding ElementName="Me" Path="DataContext.Args.BaseDirectory.Value" />
+										<Binding Path="Value" />
+									</MultiBinding>
+								</TextBox.Text>
+							</TextBox>
+						</UniformGrid>
+					</Border>
+				</DataTemplate>
+			</Setter>
+		</Style>
+	</Window.Styles>
+
+	<Border Grid.Column="0" Padding="15">
+		<Grid ColumnDefinitions="*,*">
+			<Grid Grid.Column="0" RowDefinitions="*,auto,auto">
+				<!-- Settings Only Modifiable Before Searching -->
+				<StackPanel Grid.Row="0" IsEnabled="{Binding !FilesToProcess.Count}">
 					<HeaderedContentControl Header="Base Directory">
 						<TextBox Text="{Binding Args.BaseDirectory.Value}" TextWrapping="NoWrap" />
-					</HeaderedContentControl>
-
-					<HeaderedContentControl Header="Output Directory">
-						<ContentControl Classes="rel-path" Content="{Binding Args.OutputDirectory}" />
 					</HeaderedContentControl>
 
 					<HeaderedContentControl Header="Root Directories">
@@ -57,41 +83,65 @@
 							</ItemsRepeater>
 						</HeaderedContentControl>
 					</UniformGrid>
-
-					<StackPanel.Styles>
-						<Style Selector="ItemsRepeater.rel-paths">
-							<Setter Property="ItemTemplate">
-								<DataTemplate>
-									<ContentControl Classes="rel-path" Content="{Binding}" />
-								</DataTemplate>
-							</Setter>
-						</Style>
-						<Style Selector="ContentControl.rel-path">
-							<Setter Property="ContentTemplate">
-								<DataTemplate>
-									<Border BorderBrush="Green" BorderThickness="2">
-										<UniformGrid Columns="1">
-											<TextBox Text="{Binding Value}" />
-											<TextBox IsReadOnly="True" IsEnabled="False">
-												<TextBox.Text>
-													<MultiBinding Converter="{x:Static conv:PathConverters.Join}">
-														<Binding ElementName="Me" Path="DataContext.Args.BaseDirectory.Value" />
-														<Binding Path="Value" />
-													</MultiBinding>
-												</TextBox.Text>
-											</TextBox>
-										</UniformGrid>
-									</Border>
-								</DataTemplate>
-							</Setter>
-						</Style>
-					</StackPanel.Styles>
 				</StackPanel>
 
-				<UniformGrid Grid.Row="1" Rows="1">
-					<Button Content="Get Paths" Command="{Binding GetPaths}" />
+				<!-- Settings Modifiable At All Times -->
+				<StackPanel Grid.Row="1">
+					<HeaderedContentControl Header="Output Directory">
+						<ContentControl Classes="rel-path" Content="{Binding Args.OutputDirectory}" />
+					</HeaderedContentControl>
+				</StackPanel>
+
+				<!-- Button Ribbon -->
+				<UniformGrid Grid.Row="2" Rows="1">
+					<Button Content="Get Paths" Command="{Binding GetPaths}"
+									IsVisible="{Binding !FilesToProcess.Count}" />
+					<Button Content="Clear Paths" Command="{Binding ClearPaths}"
+									IsVisible="{Binding FilesToProcess.Count}" />
 				</UniformGrid>
 			</Grid>
-		</Border>
-	</Grid>
+
+			<Grid Grid.Column="1">
+				<ListBox Items="{Binding FilesToProcess}">
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<StackPanel>
+								<HeaderedContentControl Header="Source">
+									<TextBlock Text="{Binding Source}" TextWrapping="Wrap" />
+								</HeaderedContentControl>
+								<HeaderedContentControl Header="Destination">
+									<TextBlock TextWrapping="Wrap">
+										<TextBlock.Text>
+											<MultiBinding Converter="{x:Static conv:PathConverters.Join}">
+												<Binding ElementName="Me" Path="DataContext.Args.BaseDirectory.Value" />
+												<Binding ElementName="Me" Path="DataContext.Args.OutputDirectory.Value" />
+												<Binding Path="Time" />
+												<Binding Path="Relative" />
+											</MultiBinding>
+										</TextBlock.Text>
+									</TextBlock>
+								</HeaderedContentControl>
+							</StackPanel>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+				<!--
+				<ItemsRepeater Items="{Binding FilesToProcess}">
+					<ItemsRepeater.ItemTemplate>
+						<DataTemplate>
+							<StackPanel>
+								<HeaderedContentControl Header="Source">
+									<TextBlock Text="{Binding Source}" />
+								</HeaderedContentControl>
+								<HeaderedContentControl Header="Destination">
+									<TextBlock Text="{Binding Destination}" />
+								</HeaderedContentControl>
+							</StackPanel>
+						</DataTemplate>
+					</ItemsRepeater.ItemTemplate>
+				</ItemsRepeater>
+				-->
+			</Grid>
+		</Grid>
+	</Border>
 </Window>
