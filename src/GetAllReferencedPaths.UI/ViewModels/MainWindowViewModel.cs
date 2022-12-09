@@ -1,10 +1,3 @@
-using Avalonia.Controls;
-using Avalonia.Controls.Presenters;
-using Avalonia.Controls.Primitives;
-using Avalonia.Threading;
-
-using DynamicData.Alias;
-
 using ReactiveUI;
 
 using System;
@@ -24,6 +17,8 @@ public sealed class MainWindowViewModel : ViewModelBase
 	public ObservableCollection<CopyFileViewModel> FilesToProcess { get; } = new();
 
 	#region Commands
+	public ReactiveCommand<Unit, Unit> AddRootDirectory { get; }
+	public ReactiveCommand<Unit, Unit> AddSourceFile { get; }
 	public ReactiveCommand<Unit, Unit> ClearPaths { get; }
 	public ReactiveCommand<Unit, Unit> CopyFiles { get; }
 	public ReactiveCommand<Unit, Unit> GetPaths { get; }
@@ -33,9 +28,23 @@ public sealed class MainWindowViewModel : ViewModelBase
 	{
 		Args = new(args);
 
+		AddRootDirectory = ReactiveCommand.CreateFromTask(AddRootDirectoryAsync);
+		AddSourceFile = ReactiveCommand.CreateFromTask(AddSourceFileAsync);
 		ClearPaths = ReactiveCommand.CreateFromTask(ClearPathsAsync);
 		CopyFiles = ReactiveCommand.CreateFromTask(CopyFilesAsync);
 		GetPaths = ReactiveCommand.CreateFromTask(GetPathsAsync);
+	}
+
+	private Task AddRootDirectoryAsync()
+	{
+		Args.AddRootDirectory();
+		return Task.CompletedTask;
+	}
+
+	private Task AddSourceFileAsync()
+	{
+		Args.AddSourceFile();
+		return Task.CompletedTask;
 	}
 
 	private Task ClearPathsAsync()

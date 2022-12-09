@@ -1,6 +1,5 @@
 ﻿using Avalonia.Data.Converters;
 
-using System.Collections;
 using System.IO;
 
 namespace GetAllReferencedPaths.UI.Converters;

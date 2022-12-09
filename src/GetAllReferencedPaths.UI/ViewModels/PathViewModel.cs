@@ -1,21 +1,15 @@
-﻿using ReactiveUI;
-
-using System;
-using System.Collections.Generic;
+﻿using IO = System.IO;
 
 namespace GetAllReferencedPaths.UI.ViewModels;
 
-public abstract class PathViewModel : StringWrapper
+public sealed record PathViewModel(
+	bool IsValid,
+	string Path
+)
 {
-	private IEnumerable<string> _Paths = Array.Empty<string>();
+	public static PathViewModel SourceFile(string path)
+		=> new(IO.File.Exists(path), IO.Path.GetFullPath(path));
 
-	public IEnumerable<string> Paths
-	{
-		get => _Paths;
-		set => this.RaiseAndSetIfChanged(ref _Paths, value);
-	}
-
-	protected PathViewModel(string value) : base(value)
-	{
-	}
+	public static PathViewModel RootDirectory(string path)
+		=> new(IO.Directory.Exists(path), IO.Path.GetFullPath(path));
 }

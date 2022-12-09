@@ -5,8 +5,6 @@ using Avalonia.Markup.Xaml;
 using GetAllReferencedPaths.UI.ViewModels;
 using GetAllReferencedPaths.UI.Views;
 
-using System.IO;
-
 namespace GetAllReferencedPaths.UI;
 
 public sealed class App : Application

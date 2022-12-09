@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# RCS1021: Convert lambda expression body to expression body.
+dotnet_diagnostic.RCS1021.severity = none

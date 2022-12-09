@@ -2,6 +2,7 @@
 				xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 				xmlns:vm="using:GetAllReferencedPaths.UI.ViewModels"
 				xmlns:conv="using:GetAllReferencedPaths.UI.Converters"
+				xmlns:sys="clr-namespace:System;assembly=mscorlib"
 				xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 				xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 				mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -10,62 +11,99 @@
 				Icon="/Assets/avalonia-logo.ico"
 				Title="GetAllReferencedPaths.UI">
 
-	<Design.DataContext>
-		<vm:MainWindowViewModel />
-	</Design.DataContext>
+	<Window.Resources>
+		<ResourceDictionary>
+			<sys:Int32 x:Key="InputSmallSpacer">5</sys:Int32>
+			<Thickness x:Key="InputBigSpacer">0,0,0,10</Thickness>
+			<Thickness x:Key="BasePadding">10</Thickness>
+		</ResourceDictionary>
+	</Window.Resources>
 
 	<Window.Styles>
+		<Style Selector="#Base > :is(Decorator)">
+			<Setter Property="Padding" Value="{DynamicResource BasePadding}" />
+		</Style>
+
+		<Style Selector=":is(Layoutable).input-option">
+			<Setter Property="Margin" Value="{DynamicResource InputBigSpacer}" />
+		</Style>
+
 		<Style Selector="ItemsRepeater.rel-paths">
 			<Setter Property="ItemTemplate">
 				<DataTemplate>
 					<ContentControl Classes="rel-path" Content="{Binding}" />
 				</DataTemplate>
 			</Setter>
+			<Setter Property="Layout">
+				<StackLayout Spacing="{DynamicResource InputSmallSpacer}" />
+			</Setter>
 		</Style>
+
 		<Style Selector="ContentControl.rel-path">
 			<Setter Property="ContentTemplate">
 				<DataTemplate>
-					<Border BorderBrush="Purple" BorderThickness="2">
-						<StackPanel>
-							<TextBox Text="{Binding Value}" />
+					<Expander Name="rExpander" Padding="0" HorizontalAlignment="Stretch"
+										MinHeight="{Binding ElementName=rTextBox, Path=MinHeight}">
+						<Expander.IsExpanded>
+							<MultiBinding Converter="{x:Static BoolConverters.Or}">
+								<Binding ElementName="rExpander" Path="IsExpanded" />
+								<Binding ElementName="rTextBox" Path="IsFocused" />
+							</MultiBinding>
+						</Expander.IsExpanded>
+
+						<Expander.Header>
+							<TextBox Name="rTextBox" Text="{Binding Value}" />
+						</Expander.Header>
+
+						<Expander.Content>
 							<ItemsRepeater Items="{Binding Paths}">
 								<ItemsRepeater.ItemTemplate>
 									<DataTemplate>
-										<TextBox IsEnabled="False" Text="{Binding}" />
+										<Border BorderThickness="1"
+														BorderBrush="{Binding IsValid, Converter={x:Static conv:BrushConverters.FileExists}}">
+											<TextBox IsEnabled="False" Text="{Binding Path}" />
+										</Border>
 									</DataTemplate>
 								</ItemsRepeater.ItemTemplate>
 							</ItemsRepeater>
-						</StackPanel>
-					</Border>
+						</Expander.Content>
+					</Expander>
 				</DataTemplate>
 			</Setter>
 		</Style>
 	</Window.Styles>
 
-	<Grid ColumnDefinitions="*,*">
+	<Grid Name="Base" ColumnDefinitions="*,*">
 		<!-- Input -->
-		<Border Grid.Column="0" Padding="15">
+		<Border Grid.Column="0">
 			<Grid RowDefinitions="*,auto,auto">
 				<!-- Settings Only Modifiable Before Searching -->
-				<StackPanel Grid.Row="0" IsEnabled="{Binding !FilesToProcess.Count}">
-					<HeaderedContentControl Header="Base Directory">
-						<TextBox Text="{Binding Args.BaseDirectory.Value}" TextWrapping="NoWrap" />
-					</HeaderedContentControl>
+				<ScrollViewer Grid.Row="0">
+					<StackPanel IsEnabled="{Binding !FilesToProcess.Count}">
+						<HeaderedContentControl Classes="input-option" Header="Base Directory">
+							<TextBox Text="{Binding Args.BaseDirectory.Value}" TextWrapping="NoWrap" />
+						</HeaderedContentControl>
 
-					<HeaderedContentControl Header="Root Directories">
-						<ItemsRepeater Classes="rel-paths" Items="{Binding Args.RootDirectories}" />
-					</HeaderedContentControl>
+						<StackPanel Classes="input-option">
+							<HeaderedContentControl Header="Root Directories">
+								<ItemsRepeater Classes="rel-paths" Items="{Binding Args.RootDirectories}" />
+							</HeaderedContentControl>
+							<Button Content="Add Root Directory" Command="{Binding AddRootDirectory}" />
+						</StackPanel>
 
-					<HeaderedContentControl Header="Source Files">
-						<ItemsRepeater Classes="rel-paths" Items="{Binding Args.SourceFiles}" />
-					</HeaderedContentControl>
+						<StackPanel Classes="input-option">
+							<HeaderedContentControl Header="Source Files">
+								<ItemsRepeater Classes="rel-paths" Items="{Binding Args.SourceFiles}" />
+							</HeaderedContentControl>
+							<Button Content="Add Source File" Command="{Binding AddSourceFile}" />
+						</StackPanel>
 
-					<UniformGrid Columns="1">
-						<HeaderedContentControl Header="Interchangeable File Types">
+						<HeaderedContentControl Classes="input-option" Header="Interchangeable File Types">
 							<ItemsRepeater Items="{Binding Args.InterchangeableFileTypes}">
 								<ItemsRepeater.Layout>
-									<StackLayout Spacing="10" />
+									<StackLayout Spacing="{DynamicResource InputSmallSpacer}" />
 								</ItemsRepeater.Layout>
+
 								<ItemsRepeater.ItemTemplate>
 									<DataTemplate>
 										<ItemsRepeater Items="{Binding}">
@@ -82,8 +120,8 @@
 								</ItemsRepeater.ItemTemplate>
 							</ItemsRepeater>
 						</HeaderedContentControl>
-					</UniformGrid>
-				</StackPanel>
+					</StackPanel>
+				</ScrollViewer>
 
 				<!-- Settings Modifiable At All Times -->
 				<StackPanel Grid.Row="1">
@@ -103,7 +141,7 @@
 		</Border>
 
 		<!-- Output -->
-		<Border Grid.Column="1" Padding="15">
+		<Border Grid.Column="1">
 			<ScrollViewer>
 				<ItemsRepeater Items="{Binding FilesToProcess}">
 					<ItemsRepeater.ItemTemplate>

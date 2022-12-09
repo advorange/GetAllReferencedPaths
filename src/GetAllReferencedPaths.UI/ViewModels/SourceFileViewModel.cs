@@ -10,9 +10,9 @@ using System.Reactive.Linq;
 
 namespace GetAllReferencedPaths.UI.ViewModels;
 
-public sealed class SourceFileViewModel : PathViewModel
+public sealed class SourceFileViewModel : PathCollectionViewModel
 {
-	public SourceFileViewModel(ObservableCollection<DirectoryViewModel> roots, string value) : base(value)
+	public SourceFileViewModel(ObservableCollection<RootDirectoryViewModel> roots, string value) : base(value)
 	{
 		var rootChange = roots
 			.ToObservableChangeSet()
@@ -24,7 +24,7 @@ public sealed class SourceFileViewModel : PathViewModel
 			var (roots, val) = x;
 			return roots
 				.SelectMany(x => x.Paths)
-				.Select(x => Path.GetFullPath(Path.Combine(x, val)))
+				.Select(x => PathViewModel.SourceFile(Path.Combine(x.Path, val)))
 				.ToList();
 		}).BindTo(this, x => x.Paths);
 	}
