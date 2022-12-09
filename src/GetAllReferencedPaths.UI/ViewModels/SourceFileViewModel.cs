@@ -1,12 +1,11 @@
-﻿using Avalonia.Controls.Shapes;
-
-using DynamicData;
+﻿using DynamicData;
 using DynamicData.Binding;
 
 using GetAllReferencedPaths.Gatherers;
 
 using ReactiveUI;
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -23,19 +22,15 @@ public sealed class SourceFileViewModel : PathCollectionViewModel
 			.ToObservableChangeSet()
 			.AutoRefresh(x => x.Paths)
 			.ToCollection();
-		var valChange = this.WhenAnyValue(x => x.Value);
-		rootChange.CombineLatest(valChange).Select(tuple =>
+		BindToPaths(rootChange, (roots, val) =>
 		{
-			var (roots, val) = tuple;
-			var output = new List<PathViewModel>();
-			foreach (var root in roots)
+			return roots.SelectMany(r =>
 			{
-				var dirs = root.Paths.Select(x => new DirectoryInfo(x.Path));
-				var files = GathererBase.RootFile(dirs, val, existingFilesOnly: false)
-					.Select(x => PathViewModel.SourceFile(x.FullName));
-				output.AddRange(files);
-			}
-			return output;
-		}).BindTo(this, x => x.Paths);
+				return r.Paths
+					.Select(p => new DirectoryInfo(p.Path))
+					.RootFile(val, existingFilesOnly: false)
+					.Select(f => PathViewModel.FromFile(f.FullName));
+			}).ToList();
+		});
 	}
 }

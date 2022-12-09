@@ -7,9 +7,9 @@ public sealed record PathViewModel(
 	string Path
 )
 {
-	public static PathViewModel SourceFile(string path)
+	public static PathViewModel FromFile(string path)
 		=> new(IO.File.Exists(path), IO.Path.GetFullPath(path));
 
-	public static PathViewModel RootDirectory(string path)
+	public static PathViewModel FromDirectory(string path)
 		=> new(IO.Directory.Exists(path), IO.Path.GetFullPath(path));
 }
