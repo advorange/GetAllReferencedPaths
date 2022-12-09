@@ -42,9 +42,10 @@
 		</Style>
 	</Window.Styles>
 
-	<Border Grid.Column="0" Padding="15">
-		<Grid ColumnDefinitions="*,*">
-			<Grid Grid.Column="0" RowDefinitions="*,auto,auto">
+	<Grid ColumnDefinitions="*,*">
+		<!-- Input -->
+		<Border Grid.Column="0" Padding="15">
+			<Grid RowDefinitions="*,auto,auto">
 				<!-- Settings Only Modifiable Before Searching -->
 				<StackPanel Grid.Row="0" IsEnabled="{Binding !FilesToProcess.Count}">
 					<HeaderedContentControl Header="Base Directory">
@@ -99,48 +100,46 @@
 									IsVisible="{Binding FilesToProcess.Count}" />
 				</UniformGrid>
 			</Grid>
+		</Border>
 
-			<Grid Grid.Column="1">
-				<ListBox Items="{Binding FilesToProcess}">
-					<ListBox.ItemTemplate>
-						<DataTemplate>
-							<StackPanel>
-								<HeaderedContentControl Header="Source">
-									<TextBlock Text="{Binding Source}" TextWrapping="Wrap" />
-								</HeaderedContentControl>
-								<HeaderedContentControl Header="Destination">
-									<TextBlock TextWrapping="Wrap">
-										<TextBlock.Text>
-											<MultiBinding Converter="{x:Static conv:PathConverters.Join}">
-												<Binding ElementName="Me" Path="DataContext.Args.BaseDirectory.Value" />
-												<Binding ElementName="Me" Path="DataContext.Args.OutputDirectory.Value" />
-												<Binding Path="Time" />
-												<Binding Path="Relative" />
-											</MultiBinding>
-										</TextBlock.Text>
-									</TextBlock>
-								</HeaderedContentControl>
-							</StackPanel>
-						</DataTemplate>
-					</ListBox.ItemTemplate>
-				</ListBox>
-				<!--
+		<!-- Output -->
+		<Border Grid.Column="1" Padding="15">
+			<ScrollViewer>
 				<ItemsRepeater Items="{Binding FilesToProcess}">
 					<ItemsRepeater.ItemTemplate>
 						<DataTemplate>
-							<StackPanel>
-								<HeaderedContentControl Header="Source">
-									<TextBlock Text="{Binding Source}" />
-								</HeaderedContentControl>
-								<HeaderedContentControl Header="Destination">
-									<TextBlock Text="{Binding Destination}" />
-								</HeaderedContentControl>
-							</StackPanel>
+							<Border BorderThickness="1"
+											BorderBrush="{DynamicResource TextControlBorderBrush}">
+								<StackPanel>
+									<HeaderedContentControl Header="Source">
+										<TextBox Text="{Binding Source}" />
+									</HeaderedContentControl>
+									<HeaderedContentControl Header="Destination">
+										<TextBox>
+											<TextBox.Text>
+												<MultiBinding Converter="{x:Static conv:PathConverters.Join}">
+													<Binding ElementName="Me" Path="DataContext.Args.BaseDirectory.Value" />
+													<Binding ElementName="Me" Path="DataContext.Args.OutputDirectory.Value" />
+													<Binding Path="Time" />
+													<Binding Path="Relative" />
+												</MultiBinding>
+											</TextBox.Text>
+										</TextBox>
+									</HeaderedContentControl>
+								</StackPanel>
+							</Border>
 						</DataTemplate>
 					</ItemsRepeater.ItemTemplate>
+
+					<ItemsRepeater.Styles>
+						<Style Selector="TextBox">
+							<Setter Property="BorderThickness" Value="0" />
+							<Setter Property="IsReadOnly" Value="True" />
+							<Setter Property="TextWrapping" Value="Wrap" />
+						</Style>
+					</ItemsRepeater.Styles>
 				</ItemsRepeater>
-				-->
-			</Grid>
-		</Grid>
-	</Border>
+			</ScrollViewer>
+		</Border>
+	</Grid>
 </Window>
