@@ -7,6 +7,6 @@ public static class BrushConverters
 {
 	public static FuncValueConverter<bool, IBrush> FileExists { get; } = new(input =>
 	{
-		return input ? Brushes.Green : Brushes.Red;
+		return input ? Brushes.DarkGreen : Brushes.DarkRed;
 	});
 }

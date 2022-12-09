@@ -7,9 +7,9 @@ namespace GetAllReferencedPaths.UI.ViewModels;
 
 public abstract class PathCollectionViewModel : StringWrapper
 {
-	private IEnumerable<PathViewModel> _Paths = Array.Empty<PathViewModel>();
+	private IReadOnlyList<PathViewModel> _Paths = Array.Empty<PathViewModel>();
 
-	public IEnumerable<PathViewModel> Paths
+	public IReadOnlyList<PathViewModel> Paths
 	{
 		get => _Paths;
 		set => this.RaiseAndSetIfChanged(ref _Paths, value);

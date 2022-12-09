@@ -59,10 +59,8 @@
 							<ItemsRepeater Items="{Binding Paths}">
 								<ItemsRepeater.ItemTemplate>
 									<DataTemplate>
-										<Border BorderThickness="1"
-														BorderBrush="{Binding IsValid, Converter={x:Static conv:BrushConverters.FileExists}}">
-											<TextBlock Text="{Binding Path}" />
-										</Border>
+										<TextBlock Text="{Binding Path}"
+															 Background="{Binding IsValid, Converter={x:Static conv:BrushConverters.FileExists}}" />
 									</DataTemplate>
 								</ItemsRepeater.ItemTemplate>
 							</ItemsRepeater>
