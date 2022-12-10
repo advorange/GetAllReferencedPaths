@@ -33,8 +33,8 @@
 			<Setter Property="ItemTemplate">
 				<DataTemplate>
 					<Grid ColumnDefinitions="auto,*">
-						<Button Grid.Column="0" Content="X"
-										VerticalAlignment="Top"
+						<Button Grid.Column="0" Content="X" Foreground="Red"
+										VerticalAlignment="Stretch" VerticalContentAlignment="Center"
 										Command="{Binding #Me.DataContext.RemoveFromOwner}"
 										CommandParameter="{Binding}" />
 
@@ -53,6 +53,12 @@
 				<DataTemplate>
 					<Expander Name="rExpander" Padding="0" MinHeight="0"
 										HorizontalAlignment="Stretch">
+						<Expander.Styles>
+							<Style Selector="ToggleButton#ExpanderHeader">
+								<Setter Property="Padding" Value="0" />
+							</Style>
+						</Expander.Styles>
+
 						<Expander.IsExpanded>
 							<MultiBinding Converter="{x:Static BoolConverters.Or}">
 								<Binding Path="#rExpander.IsExpanded" />
