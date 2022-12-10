@@ -5,24 +5,24 @@ namespace GetAllReferencedPaths.UI.ViewModels.Arguments;
 
 public sealed class ArgumentsViewModel : ViewModelBase
 {
-	public StringWrapper BaseDirectory { get; set; }
-	public ObservableCollection<ObservableCollection<StringWrapper>> InterchangeableFileTypes { get; set; } = new();
-	public RootDirectoryViewModel OutputDirectory { get; set; }
-	public ObservableCollection<RootDirectoryViewModel> RootDirectories { get; set; } = new();
-	public ObservableCollection<SourceFileViewModel> SourceFiles { get; set; } = new();
+	public StringWrapper BaseDirectory { get; }
+	public ObservableCollection<ObservableCollection<StringWrapper>> InterchangeableFileTypes { get; } = new();
+	public RootDirectoryViewModel OutputDirectory { get; }
+	public ObservableCollection<RootDirectoryViewModel> RootDirectories { get; } = new();
+	public ObservableCollection<SourceFileViewModel> SourceFiles { get; } = new();
 
 	public ArgumentsViewModel(GetAllReferencedPaths.Arguments args)
 	{
 		BaseDirectory = new(args.BaseDirectory);
-		OutputDirectory = new(BaseDirectory, args.OutputDirectory);
+		OutputDirectory = new(this, args.OutputDirectory);
 
 		foreach (var item in args.RootDirectories)
 		{
-			RootDirectories.Add(new(BaseDirectory, item));
+			AddRootDirectory(item);
 		}
 		foreach (var item in args.SourceFiles)
 		{
-			SourceFiles.Add(new(RootDirectories, item));
+			AddSourceFile(item);
 		}
 
 		foreach (var set in args.InterchangeableFileTypes)
@@ -36,11 +36,11 @@ public sealed class ArgumentsViewModel : ViewModelBase
 		}
 	}
 
-	public void AddRootDirectory()
-		=> RootDirectories.Add(new(BaseDirectory, ""));
+	public void AddRootDirectory(string value = "")
+		=> RootDirectories.Add(new(this, value));
 
-	public void AddSourceFile()
-		=> SourceFiles.Add(new(RootDirectories, ""));
+	public void AddSourceFile(string value = "")
+		=> SourceFiles.Add(new(this, value));
 
 	public GetAllReferencedPaths.Arguments ToModel()
 	{

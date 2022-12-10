@@ -32,9 +32,17 @@
 		<Style Selector="ItemsRepeater.rel-paths">
 			<Setter Property="ItemTemplate">
 				<DataTemplate>
-					<ContentControl Classes="rel-path" Content="{Binding}" />
+					<Grid ColumnDefinitions="auto,*">
+						<Button Grid.Column="0" Content="X"
+										VerticalAlignment="Top"
+										Command="{Binding #Me.DataContext.RemoveFromOwner}"
+										CommandParameter="{Binding}" />
+
+						<ContentControl Grid.Column="1" Classes="rel-path" Content="{Binding}" />
+					</Grid>
 				</DataTemplate>
 			</Setter>
+
 			<Setter Property="Layout">
 				<StackLayout Spacing="{DynamicResource InputSmallSpacer}" />
 			</Setter>
@@ -44,11 +52,11 @@
 			<Setter Property="ContentTemplate">
 				<DataTemplate>
 					<Expander Name="rExpander" Padding="0" MinHeight="0"
-							HorizontalAlignment="Stretch">
+										HorizontalAlignment="Stretch">
 						<Expander.IsExpanded>
 							<MultiBinding Converter="{x:Static BoolConverters.Or}">
-								<Binding ElementName="rExpander" Path="IsExpanded" />
-								<Binding ElementName="rTextBox" Path="IsFocused" />
+								<Binding Path="#rExpander.IsExpanded" />
+								<Binding Path="#rTextBox.IsFocused" />
 							</MultiBinding>
 						</Expander.IsExpanded>
 
@@ -115,6 +123,7 @@
 											<ItemsRepeater.Layout>
 												<StackLayout Orientation="Horizontal" />
 											</ItemsRepeater.Layout>
+
 											<ItemsRepeater.ItemTemplate>
 												<DataTemplate>
 													<TextBox Text="{Binding Value}" />

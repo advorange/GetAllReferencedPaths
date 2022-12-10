@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 
+using GetAllReferencedPaths.UI.Converters;
 using GetAllReferencedPaths.UI.ViewModels.Arguments;
 using GetAllReferencedPaths.UI.ViewModels.Output;
 
@@ -34,6 +35,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 	public ReactiveCommand<Unit, Unit> ClearPaths { get; }
 	public ReactiveCommand<Unit, Unit> CopyFiles { get; }
 	public ReactiveCommand<Unit, Unit> GetPaths { get; }
+	public ReactiveCommand<ICanDetach, Unit> RemoveFromOwner { get; }
 	public ReactiveCommand<Unit, Unit> SelectBaseDirectory { get; }
 	#endregion Commands
 
@@ -47,6 +49,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 		ClearPaths = ReactiveCommand.CreateFromTask(ClearPathsAsync);
 		CopyFiles = ReactiveCommand.CreateFromTask(CopyFilesAsync);
 		GetPaths = ReactiveCommand.CreateFromTask(GetPathsAsync);
+		RemoveFromOwner = ReactiveCommand.CreateFromTask<ICanDetach>(RemoveFromOwnerAsync);
 		SelectBaseDirectory = ReactiveCommand.CreateFromTask(SelectBaseDirectoryAsync);
 	}
 
@@ -166,6 +169,12 @@ public sealed class MainWindowViewModel : ViewModelBase
 		sw.Stop();
 		Searching.EllapsedTime = sw.Elapsed;
 		Searching.CurrentFile = null;
+	}
+
+	private Task RemoveFromOwnerAsync(ICanDetach item)
+	{
+		item.RemoveFromOwner();
+		return Task.CompletedTask;
 	}
 
 	private async Task SelectBaseDirectoryAsync()
