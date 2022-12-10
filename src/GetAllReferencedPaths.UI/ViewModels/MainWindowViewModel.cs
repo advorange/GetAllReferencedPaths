@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 
 using GetAllReferencedPaths.UI.ViewModels.Arguments;
+using GetAllReferencedPaths.UI.ViewModels.FileSystem;
 
 using ReactiveUI;
 
@@ -8,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 
@@ -17,28 +19,13 @@ public sealed class MainWindowViewModel : ViewModelBase
 {
 	private readonly Window _Window;
 
-	private string? _CurrentlyProcessingFile;
-	private TimeSpan _LastSearchTime;
-	private int _SearchingCount;
+	private SearchingViewModel _Searching = new();
 
 	public ArgumentsViewModel Args { get; }
-	public string? CurrentlyProcessingFile
+	public SearchingViewModel Searching
 	{
-		get => _CurrentlyProcessingFile;
-		set => this.RaiseAndSetIfChanged(ref _CurrentlyProcessingFile, value);
-	}
-	public SortedObservableCollection<CopyFileViewModel> FilesToCopy { get; } = new(
-		Comparer<CopyFileViewModel>.Create((x, y) => x.Source.CompareTo(y.Source))
-	);
-	public TimeSpan LastSearchTime
-	{
-		get => _LastSearchTime;
-		set => this.RaiseAndSetIfChanged(ref _LastSearchTime, value);
-	}
-	public int SearchingCount
-	{
-		get => _SearchingCount;
-		set => this.RaiseAndSetIfChanged(ref _SearchingCount, value);
+		get => _Searching;
+		set => this.RaiseAndSetIfChanged(ref _Searching, value);
 	}
 
 	#region Commands
@@ -77,43 +64,88 @@ public sealed class MainWindowViewModel : ViewModelBase
 
 	private Task ClearPathsAsync()
 	{
-		FilesToCopy.Clear();
+		Searching = new();
 		return Task.CompletedTask;
 	}
 
-	private async Task CopyFilesAsync()
+	private Task CopyFilesAsync()
 	{
-		foreach (var file in FilesToCopy)
+		var baseDir = Args.BaseDirectory.Value!;
+		var time = DateTime.Now.ToString("s").Replace(':', '.')!;
+
+		void CopyFiles(DirectoryViewModel dirVM)
 		{
-			var destination = Path.Combine(
-				Args.OutputDirectory.Value!,
-				file.Time,
-				file.Relative
-			);
-			Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
-			File.Copy(file.Source, destination);
-			Debug.WriteLine($"Copied: {file.Relative} -> {destination}");
+			foreach (var file in dirVM.Files)
+			{
+				var destination = Path.Combine(
+					baseDir,
+					time,
+					file.Relative
+				);
+				Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+				File.Copy(file.Info.FullName, destination);
+				Debug.WriteLine($"Copied: {file.Relative} -> {destination}");
+			}
+			foreach (var dir in dirVM.Subdirectories)
+			{
+				CopyFiles(dir);
+			}
 		}
+
+		CopyFiles(Searching.FileSystem!);
+		return Task.CompletedTask;
 	}
 
 	private async Task GetPathsAsync()
 	{
-		FilesToCopy.Clear();
+		void AddFileToTree(DirectoryInfo baseDirectory, FileInfo file)
+		{
+			var segments = new List<string>();
+			var dir = file.Directory;
+			while (baseDirectory.FullName != dir!.FullName)
+			{
+				segments.Add(dir.Name);
+				dir = dir.Parent;
+			}
+			// reverse so the segments go in order from nearest to the base dir
+			// to farthest
+			segments.Reverse();
+
+			var fs = Searching.FileSystem!;
+			foreach (var segment in segments)
+			{
+				var subDir = fs.Subdirectories
+					.FirstOrDefault(x => x.Info.Name == segment);
+				if (subDir is null)
+				{
+					subDir = new(new(Path.Combine(fs.Info.FullName, segment)));
+					fs.Subdirectories.Add(subDir);
+				}
+				fs = subDir;
+			}
+			fs.Files.Add(new(baseDirectory, file));
+		}
 
 		var args = RuntimeArguments.Create(Args.ToModel());
-		var startTime = DateTime.Now;
+		Searching = new()
+		{
+			FileSystem = new(args.BaseDirectory),
+		};
+
+		var sw = Stopwatch.StartNew();
 		var alreadyProcessed = new HashSet<string>();
 		var filesToProcess = new Stack<FileInfo>(args.Sources);
 		while (filesToProcess.TryPop(out var file))
 		{
-			SearchingCount = filesToProcess.Count;
+			Searching.Remaining = filesToProcess.Count;
 			if (!alreadyProcessed.Add(Path.GetFullPath(file.FullName)))
 			{
 				continue;
 			}
 
-			FilesToCopy.Add(new(args, startTime, file));
-			CurrentlyProcessingFile = file.FullName;
+			Searching.CurrentFile = file.FullName;
+			Searching.Found = alreadyProcessed.Count;
+			AddFileToTree(args.BaseDirectory, file);
 
 			foreach (var gatherer in args.Gatherers)
 			{
@@ -126,13 +158,14 @@ public sealed class MainWindowViewModel : ViewModelBase
 				foreach (var rootedFile in gatherer.RootFiles(file, result.Value))
 				{
 					filesToProcess.Push(rootedFile);
-					SearchingCount = filesToProcess.Count;
+					Searching.Remaining = filesToProcess.Count;
 				}
 			}
 		}
 
-		LastSearchTime = DateTime.Now - startTime;
-		CurrentlyProcessingFile = null;
+		sw.Stop();
+		Searching.EllapsedTime = sw.Elapsed;
+		Searching.CurrentFile = null;
 	}
 
 	private async Task SelectBaseDirectoryAsync()

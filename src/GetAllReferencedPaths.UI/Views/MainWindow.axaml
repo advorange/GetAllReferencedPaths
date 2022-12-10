@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
 				xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 				xmlns:vm="using:GetAllReferencedPaths.UI.ViewModels"
+				xmlns:fs="using:GetAllReferencedPaths.UI.ViewModels.FileSystem"
 				xmlns:conv="using:GetAllReferencedPaths.UI.Converters"
 				xmlns:sys="clr-namespace:System;assembly=mscorlib"
 				xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -77,7 +78,7 @@
 			<Grid RowDefinitions="*,auto,auto">
 				<!-- Settings Only Modifiable Before Searching -->
 				<ScrollViewer Grid.Row="0">
-					<StackPanel IsEnabled="{Binding !FilesToCopy.Count}">
+					<StackPanel IsEnabled="{Binding !Searching.FileSystem}">
 						<HeaderedContentControl Classes="input-option" Header="Base Directory">
 							<Grid ColumnDefinitions="*,auto">
 								<TextBox Text="{Binding Args.BaseDirectory.Value}" TextWrapping="NoWrap" />
@@ -137,9 +138,9 @@
 				<!-- Button Ribbon -->
 				<UniformGrid Grid.Row="2" Rows="1">
 					<Button Content="Get Paths" Command="{Binding GetPaths}"
-									IsVisible="{Binding !FilesToCopy.Count}" />
+									IsVisible="{Binding !Searching.Found}" />
 					<Button Content="Clear Paths" Command="{Binding ClearPaths}"
-									IsVisible="{Binding FilesToCopy.Count}" />
+									IsVisible="{Binding Searching.Found}" />
 				</UniformGrid>
 			</Grid>
 		</Border>
@@ -147,71 +148,63 @@
 		<!-- Output -->
 		<Border Grid.Column="1">
 			<ScrollViewer>
-				<StackPanel IsVisible="{Binding FilesToCopy.Count}">
+				<StackPanel IsVisible="{Binding Searching.Found}">
+					<!-- While Searching -->
 					<StackPanel IsVisible="{Binding GetPaths.IsExecuting^}">
 						<HeaderedContentControl Header="Currently Processing File">
-							<TextBlock Text="{Binding CurrentlyProcessingFile}" />
+							<TextBlock Text="{Binding Searching.CurrentFile}" />
 						</HeaderedContentControl>
 
 						<UniformGrid Rows="1">
 							<HeaderedContentControl Header="Found">
 								<TextBlock>
 									<TextBlock.Text>
-										<Binding Path="FilesToCopy.Count" StringFormat="​{0} Files" />
+										<Binding Path="Searching.Found" StringFormat="​{0} Files" />
 									</TextBlock.Text>
 								</TextBlock>
 							</HeaderedContentControl>
 
-							<HeaderedContentControl Header="Left To Look Through">
+							<HeaderedContentControl Header="Remaining To Check">
 								<TextBlock>
 									<TextBlock.Text>
-										<Binding Path="SearchingCount" StringFormat="​{0} Files" />
+										<Binding Path="Searching.Remaining" StringFormat="​{0} Files" />
 									</TextBlock.Text>
 								</TextBlock>
 							</HeaderedContentControl>
 						</UniformGrid>
 					</StackPanel>
 
+					<!-- After Searching -->
 					<StackPanel IsVisible="{Binding !GetPaths.IsExecuting^}">
 						<TextBlock>
 							<TextBlock.Text>
 								<MultiBinding StringFormat="Completed! Found {0} files in {1:N3} seconds.">
-									<Binding Path="FilesToCopy.Count" />
-									<Binding Path="LastSearchTime.TotalSeconds" />
+									<Binding Path="Searching.Found" />
+									<Binding Path="Searching.EllapsedTime.TotalSeconds" />
 								</MultiBinding>
 							</TextBlock.Text>
 						</TextBlock>
 					</StackPanel>
 
-					<!--
-					<ItemsRepeater Items="{Binding FilesToCopy}">
-						<ItemsRepeater.ItemTemplate>
-							<DataTemplate>
-								<Border BorderThickness="1"
-												BorderBrush="{DynamicResource TextControlBorderBrush}">
-									<StackPanel>
-										<HeaderedContentControl Header="Source">
-											<TextBlock Text="{Binding Source}" />
-										</HeaderedContentControl>
+					<!-- Output Display -->
+					<TreeView Items="{Binding Searching.FileSystem.Items}">
+						<TreeView.Styles>
+							<Style Selector="TreeViewItem">
+								<Setter Property="IsExpanded" Value="True" />
+							</Style>
+						</TreeView.Styles>
 
-										<HeaderedContentControl Header="Destination">
-											<TextBlock>
-												<TextBlock.Text>
-													<MultiBinding Converter="{x:Static conv:PathConverters.Join}">
-														<Binding ElementName="Me" Path="DataContext.Args.BaseDirectory.Value" />
-														<Binding ElementName="Me" Path="DataContext.Args.OutputDirectory.Value" />
-														<Binding Path="Time" />
-														<Binding Path="Relative" />
-													</MultiBinding>
-												</TextBlock.Text>
-											</TextBlock>
-										</HeaderedContentControl>
-									</StackPanel>
-								</Border>
+						<TreeView.DataTemplates>
+							<TreeDataTemplate DataType="fs:DirectoryViewModel"
+																ItemsSource="{Binding Items}">
+								<TextBlock Text="{Binding Info.Name}" />
+							</TreeDataTemplate>
+
+							<DataTemplate DataType="fs:FileViewModel">
+								<TextBlock Text="{Binding Info.Name}" />
 							</DataTemplate>
-						</ItemsRepeater.ItemTemplate>
-					</ItemsRepeater>
-					-->
+						</TreeView.DataTemplates>
+					</TreeView>
 				</StackPanel>
 			</ScrollViewer>
 		</Border>
