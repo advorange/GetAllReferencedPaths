@@ -1,14 +1,11 @@
 using Avalonia.Controls;
-using Avalonia.Platform.Storage.FileIO;
 
 using ReactiveUI;
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 

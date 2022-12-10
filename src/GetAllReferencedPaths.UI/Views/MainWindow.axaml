@@ -20,7 +20,7 @@
 	</Window.Resources>
 
 	<Window.Styles>
-		<Style Selector="#Base > :is(Decorator)">
+		<Style Selector="#base > :is(Decorator)">
 			<Setter Property="Padding" Value="{DynamicResource BasePadding}" />
 		</Style>
 
@@ -71,7 +71,7 @@
 		</Style>
 	</Window.Styles>
 
-	<Grid Name="Base" ColumnDefinitions="*,*">
+	<Grid Name="base" ColumnDefinitions="*,*">
 		<!-- Input -->
 		<Border Grid.Column="0">
 			<Grid RowDefinitions="*,auto,auto">
