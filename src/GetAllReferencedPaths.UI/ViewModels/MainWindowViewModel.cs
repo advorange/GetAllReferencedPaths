@@ -18,8 +18,29 @@ public sealed class MainWindowViewModel : ViewModelBase
 {
 	private readonly Window _Window;
 
+	private string? _CurrentlyProcessingFile;
+	private TimeSpan _LastSearchTime;
+	private int _SearchingCount;
+
 	public ArgumentsViewModel Args { get; }
-	public ObservableCollection<CopyFileViewModel> FilesToCopy { get; } = new();
+	public string? CurrentlyProcessingFile
+	{
+		get => _CurrentlyProcessingFile;
+		set => this.RaiseAndSetIfChanged(ref _CurrentlyProcessingFile, value);
+	}
+	public SortedObservableCollection<CopyFileViewModel> FilesToCopy { get; } = new(
+		Comparer<CopyFileViewModel>.Create((x, y) => x.Source.CompareTo(y.Source))
+	);
+	public TimeSpan LastSearchTime
+	{
+		get => _LastSearchTime;
+		set => this.RaiseAndSetIfChanged(ref _LastSearchTime, value);
+	}
+	public int SearchingCount
+	{
+		get => _SearchingCount;
+		set => this.RaiseAndSetIfChanged(ref _SearchingCount, value);
+	}
 
 	#region Commands
 	public ReactiveCommand<Unit, Unit> AddRootDirectory { get; }
@@ -81,16 +102,19 @@ public sealed class MainWindowViewModel : ViewModelBase
 		FilesToCopy.Clear();
 
 		var args = RuntimeArguments.Create(Args.ToModel());
-
-		var time = DateTime.Now;
+		var startTime = DateTime.Now;
 		var alreadyProcessed = new HashSet<string>();
 		var filesToProcess = new Stack<FileInfo>(args.Sources);
 		while (filesToProcess.TryPop(out var file))
 		{
+			SearchingCount = filesToProcess.Count;
 			if (!alreadyProcessed.Add(Path.GetFullPath(file.FullName)))
 			{
 				continue;
 			}
+
+			FilesToCopy.Add(new(args, startTime, file));
+			CurrentlyProcessingFile = file.FullName;
 
 			foreach (var gatherer in args.Gatherers)
 			{
@@ -103,10 +127,13 @@ public sealed class MainWindowViewModel : ViewModelBase
 				foreach (var rootedFile in gatherer.RootFiles(file, result.Value))
 				{
 					filesToProcess.Push(rootedFile);
-					FilesToCopy.Add(new(args, time, rootedFile));
+					SearchingCount = filesToProcess.Count;
 				}
 			}
 		}
+
+		LastSearchTime = DateTime.Now - startTime;
+		CurrentlyProcessingFile = null;
 	}
 
 	private async Task SelectBaseDirectoryAsync()

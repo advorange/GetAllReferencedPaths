@@ -90,6 +90,7 @@
 							<HeaderedContentControl Header="Root Directories">
 								<ItemsRepeater Classes="rel-paths" Items="{Binding Args.RootDirectories}" />
 							</HeaderedContentControl>
+
 							<Button Content="Add Root Directory" Command="{Binding AddRootDirectory}" />
 						</StackPanel>
 
@@ -97,6 +98,7 @@
 							<HeaderedContentControl Header="Source Files">
 								<ItemsRepeater Classes="rel-paths" Items="{Binding Args.SourceFiles}" />
 							</HeaderedContentControl>
+
 							<Button Content="Add Source File" Command="{Binding AddSourceFile}" />
 						</StackPanel>
 
@@ -145,63 +147,71 @@
 		<!-- Output -->
 		<Border Grid.Column="1">
 			<ScrollViewer>
-				<ItemsRepeater Items="{Binding FilesToCopy}">
-					<ItemsRepeater.ItemTemplate>
-						<DataTemplate>
-							<Border BorderThickness="1"
-											BorderBrush="{DynamicResource TextControlBorderBrush}">
-								<StackPanel>
-									<HeaderedContentControl Header="Source">
-										<TextBlock Text="{Binding Source}" />
-									</HeaderedContentControl>
-									<HeaderedContentControl Header="Destination">
-										<TextBlock>
-											<TextBlock.Text>
-												<MultiBinding Converter="{x:Static conv:PathConverters.Join}">
-													<Binding ElementName="Me" Path="DataContext.Args.BaseDirectory.Value" />
-													<Binding ElementName="Me" Path="DataContext.Args.OutputDirectory.Value" />
-													<Binding Path="Time" />
-													<Binding Path="Relative" />
-												</MultiBinding>
-											</TextBlock.Text>
-										</TextBlock>
-									</HeaderedContentControl>
-								</StackPanel>
-							</Border>
-						</DataTemplate>
-					</ItemsRepeater.ItemTemplate>
-				</ItemsRepeater>
+				<StackPanel IsVisible="{Binding FilesToCopy.Count}">
+					<StackPanel IsVisible="{Binding GetPaths.IsExecuting^}">
+						<HeaderedContentControl Header="Currently Processing File">
+							<TextBlock Text="{Binding CurrentlyProcessingFile}" />
+						</HeaderedContentControl>
+
+						<UniformGrid Rows="1">
+							<HeaderedContentControl Header="Found">
+								<TextBlock>
+									<TextBlock.Text>
+										<Binding Path="FilesToCopy.Count" StringFormat="​{0} Files" />
+									</TextBlock.Text>
+								</TextBlock>
+							</HeaderedContentControl>
+
+							<HeaderedContentControl Header="Left To Look Through">
+								<TextBlock>
+									<TextBlock.Text>
+										<Binding Path="SearchingCount" StringFormat="​{0} Files" />
+									</TextBlock.Text>
+								</TextBlock>
+							</HeaderedContentControl>
+						</UniformGrid>
+					</StackPanel>
+
+					<StackPanel IsVisible="{Binding !GetPaths.IsExecuting^}">
+						<TextBlock>
+							<TextBlock.Text>
+								<MultiBinding StringFormat="Completed! Found {0} files in {1:N3} seconds.">
+									<Binding Path="FilesToCopy.Count" />
+									<Binding Path="LastSearchTime.TotalSeconds" />
+								</MultiBinding>
+							</TextBlock.Text>
+						</TextBlock>
+					</StackPanel>
+
+					<ItemsRepeater Items="{Binding FilesToCopy}">
+						<ItemsRepeater.ItemTemplate>
+							<DataTemplate>
+								<Border BorderThickness="1"
+												BorderBrush="{DynamicResource TextControlBorderBrush}">
+									<StackPanel>
+										<HeaderedContentControl Header="Source">
+											<TextBlock Text="{Binding Source}" />
+										</HeaderedContentControl>
+
+										<HeaderedContentControl Header="Destination">
+											<TextBlock>
+												<TextBlock.Text>
+													<MultiBinding Converter="{x:Static conv:PathConverters.Join}">
+														<Binding ElementName="Me" Path="DataContext.Args.BaseDirectory.Value" />
+														<Binding ElementName="Me" Path="DataContext.Args.OutputDirectory.Value" />
+														<Binding Path="Time" />
+														<Binding Path="Relative" />
+													</MultiBinding>
+												</TextBlock.Text>
+											</TextBlock>
+										</HeaderedContentControl>
+									</StackPanel>
+								</Border>
+							</DataTemplate>
+						</ItemsRepeater.ItemTemplate>
+					</ItemsRepeater>
+				</StackPanel>
 			</ScrollViewer>
 		</Border>
 	</Grid>
 </Window>
-
-<!--
-		<Window.DataTemplates>
-			<TreeDataTemplate DataType="vm:RootDirectoryViewModel"
-												ItemsSource="{Binding Paths}">
-				<TextBox Text="{Binding Value}">
-					<TextBox.IsFocused>
-						<Binding Path="IsFocused" Mode="OneWayToSource" />
-					</TextBox.IsFocused>
-				</TextBox>
-			</TreeDataTemplate>
-
-			<DataTemplate DataType="vm:PathViewModel">
-				<TextBlock Text="{Binding Path}"
-									 Background="{Binding IsValid, Converter={x:Static conv:BrushConverters.FileExists}}" />
-			</DataTemplate>
-		</Window.DataTemplates>
-
-		<Style Selector="TreeView.rel-paths > TreeViewItem">
-			<Setter Property="IsExpanded">
-				<MultiBinding Converter="{x:Static BoolConverters.Or}">
-					<Binding Path="IsFocused" />
-					<Binding Path="$self.IsExpanded" />
-				</MultiBinding>
-			</Setter>
-			<Setter Property="Padding" Value="0" />
-			<Setter Property="MinHeight" Value="0" />
-			<Setter Property="HorizontalAlignment" Value="Stretch" />
-		</Style>
--->
