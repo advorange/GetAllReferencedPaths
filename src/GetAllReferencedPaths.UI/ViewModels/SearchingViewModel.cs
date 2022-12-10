@@ -1,4 +1,4 @@
-﻿using GetAllReferencedPaths.UI.ViewModels.FileSystem;
+﻿using GetAllReferencedPaths.UI.ViewModels.Output;
 
 using ReactiveUI;
 
@@ -9,9 +9,9 @@ namespace GetAllReferencedPaths.UI.ViewModels;
 public sealed class SearchingViewModel : ViewModelBase
 {
 	private string? _CurrentlyProcessingFile;
-	private DirectoryViewModel? _FileSystem;
 	private int _Found;
 	private TimeSpan _LastSearchTime;
+	private DirectoryViewModel? _Output;
 	private int _Remaining;
 
 	public string? CurrentFile
@@ -24,15 +24,15 @@ public sealed class SearchingViewModel : ViewModelBase
 		get => _LastSearchTime;
 		set => this.RaiseAndSetIfChanged(ref _LastSearchTime, value);
 	}
-	public DirectoryViewModel? FileSystem
-	{
-		get => _FileSystem;
-		set => this.RaiseAndSetIfChanged(ref _FileSystem, value);
-	}
 	public int Found
 	{
 		get => _Found;
 		set => this.RaiseAndSetIfChanged(ref _Found, value);
+	}
+	public DirectoryViewModel? Output
+	{
+		get => _Output;
+		set => this.RaiseAndSetIfChanged(ref _Output, value);
 	}
 	public int Remaining
 	{

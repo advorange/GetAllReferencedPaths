@@ -1,7 +1,7 @@
 using Avalonia.Controls;
 
 using GetAllReferencedPaths.UI.ViewModels.Arguments;
-using GetAllReferencedPaths.UI.ViewModels.FileSystem;
+using GetAllReferencedPaths.UI.ViewModels.Output;
 
 using ReactiveUI;
 
@@ -92,7 +92,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 			}
 		}
 
-		CopyFiles(Searching.FileSystem!);
+		CopyFiles(Searching.Output!);
 		return Task.CompletedTask;
 	}
 
@@ -111,25 +111,25 @@ public sealed class MainWindowViewModel : ViewModelBase
 			// to farthest
 			segments.Reverse();
 
-			var fs = Searching.FileSystem!;
+			var output = Searching.Output!;
 			foreach (var segment in segments)
 			{
-				var subDir = fs.Subdirectories
+				var subDir = output.Subdirectories
 					.FirstOrDefault(x => x.Info.Name == segment);
 				if (subDir is null)
 				{
-					subDir = new(new(Path.Combine(fs.Info.FullName, segment)));
-					fs.Subdirectories.Add(subDir);
+					subDir = new(new(Path.Combine(output.Info.FullName, segment)));
+					output.Subdirectories.Add(subDir);
 				}
-				fs = subDir;
+				output = subDir;
 			}
-			fs.Files.Add(new(baseDirectory, file));
+			output.Files.Add(new(baseDirectory, file));
 		}
 
 		var args = RuntimeArguments.Create(Args.ToModel());
 		Searching = new()
 		{
-			FileSystem = new(args.BaseDirectory),
+			Output = new(args.BaseDirectory),
 		};
 
 		var sw = Stopwatch.StartNew();

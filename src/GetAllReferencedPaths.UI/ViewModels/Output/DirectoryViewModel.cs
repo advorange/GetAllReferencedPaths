@@ -8,7 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 
-namespace GetAllReferencedPaths.UI.ViewModels.FileSystem;
+namespace GetAllReferencedPaths.UI.ViewModels.Output;
 
 public sealed class DirectoryViewModel : FileSystemInfoViewModel<DirectoryInfo>
 {

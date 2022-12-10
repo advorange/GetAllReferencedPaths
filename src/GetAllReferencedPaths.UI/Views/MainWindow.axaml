@@ -1,7 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
 				xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 				xmlns:vm="using:GetAllReferencedPaths.UI.ViewModels"
-				xmlns:fs="using:GetAllReferencedPaths.UI.ViewModels.FileSystem"
+				xmlns:output="using:GetAllReferencedPaths.UI.ViewModels.Output"
 				xmlns:conv="using:GetAllReferencedPaths.UI.Converters"
 				xmlns:sys="clr-namespace:System;assembly=mscorlib"
 				xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -78,7 +78,7 @@
 			<Grid RowDefinitions="*,auto,auto">
 				<!-- Settings Only Modifiable Before Searching -->
 				<ScrollViewer Grid.Row="0">
-					<StackPanel IsEnabled="{Binding !Searching.FileSystem}">
+					<StackPanel IsEnabled="{Binding !Searching.Found}">
 						<HeaderedContentControl Classes="input-option" Header="Base Directory">
 							<Grid ColumnDefinitions="*,auto">
 								<TextBox Text="{Binding Args.BaseDirectory.Value}" TextWrapping="NoWrap" />
@@ -187,7 +187,7 @@
 					</StackPanel>
 
 					<!-- Output Display -->
-					<TreeView Items="{Binding Searching.FileSystem.Items}">
+					<TreeView Items="{Binding Searching.Output.Items}">
 						<TreeView.Styles>
 							<Style Selector="TreeViewItem">
 								<Setter Property="IsExpanded" Value="True" />
@@ -195,12 +195,12 @@
 						</TreeView.Styles>
 
 						<TreeView.DataTemplates>
-							<TreeDataTemplate DataType="fs:DirectoryViewModel"
+							<TreeDataTemplate DataType="output:DirectoryViewModel"
 																ItemsSource="{Binding Items}">
 								<TextBlock Text="{Binding Info.Name}" />
 							</TreeDataTemplate>
 
-							<DataTemplate DataType="fs:FileViewModel">
+							<DataTemplate DataType="output:FileViewModel">
 								<TextBlock Text="{Binding Info.Name}" />
 							</DataTemplate>
 						</TreeView.DataTemplates>

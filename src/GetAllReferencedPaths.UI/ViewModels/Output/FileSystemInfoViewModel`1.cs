@@ -2,7 +2,7 @@
 
 using System.IO;
 
-namespace GetAllReferencedPaths.UI.ViewModels.FileSystem;
+namespace GetAllReferencedPaths.UI.ViewModels.Output;
 
 public abstract class FileSystemInfoViewModel<T> : ViewModelBase, IFileSystemInfoViewModel
 	where T : FileSystemInfo

@@ -1,6 +1,8 @@
-﻿using System.IO;
+﻿using ReactiveUI;
 
-namespace GetAllReferencedPaths.UI.ViewModels.FileSystem;
+using System.IO;
+
+namespace GetAllReferencedPaths.UI.ViewModels.Output;
 
 public sealed class FileViewModel : FileSystemInfoViewModel<FileInfo>
 {

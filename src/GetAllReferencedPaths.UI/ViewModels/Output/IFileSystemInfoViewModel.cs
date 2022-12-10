@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace GetAllReferencedPaths.UI.ViewModels.FileSystem;
+namespace GetAllReferencedPaths.UI.ViewModels.Output;
 
 public interface IFileSystemInfoViewModel
 {
