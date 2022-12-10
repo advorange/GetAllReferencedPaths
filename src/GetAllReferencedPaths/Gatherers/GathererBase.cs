@@ -9,32 +9,6 @@ public abstract class GathererBase
 		Roots = roots;
 	}
 
-	public static IEnumerable<FileInfo> RootFile(
-		IEnumerable<DirectoryInfo> roots,
-		string @string)
-	{
-		foreach (var root in roots)
-		{
-			FileInfo file;
-			try
-			{
-				var joined = Path.Join(root.FullName, @string);
-				if (!File.Exists(joined))
-				{
-					continue;
-				}
-
-				file = new FileInfo(joined);
-			}
-			catch
-			{
-				continue;
-			}
-
-			yield return file;
-		}
-	}
-
 	public abstract Task<Result<List<string>>> GetStringsAsync(
 		FileInfo source,
 		CancellationToken cancellationToken = default);
@@ -52,7 +26,7 @@ public abstract class GathererBase
 				continue;
 			}
 
-			foreach (var file in RootFile(roots, @string))
+			foreach (var file in roots.RootFile(@string))
 			{
 				yield return file;
 			}

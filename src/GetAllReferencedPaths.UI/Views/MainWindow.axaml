@@ -1,0 +1,212 @@
+<Window xmlns="https://github.com/avaloniaui"
+				xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+				xmlns:vm="using:GetAllReferencedPaths.UI.ViewModels"
+				xmlns:fs="using:GetAllReferencedPaths.UI.ViewModels.FileSystem"
+				xmlns:conv="using:GetAllReferencedPaths.UI.Converters"
+				xmlns:sys="clr-namespace:System;assembly=mscorlib"
+				xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+				xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+				mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+				x:Class="GetAllReferencedPaths.UI.Views.MainWindow"
+				Name="Me"
+				Icon="/Assets/avalonia-logo.ico"
+				Title="GetAllReferencedPaths.UI">
+
+	<Window.Resources>
+		<ResourceDictionary>
+			<sys:Int32 x:Key="InputSmallSpacer">5</sys:Int32>
+			<Thickness x:Key="InputBigSpacer">0,0,0,10</Thickness>
+			<Thickness x:Key="BasePadding">10</Thickness>
+		</ResourceDictionary>
+	</Window.Resources>
+
+	<Window.Styles>
+		<Style Selector="#Base > :is(Decorator)">
+			<Setter Property="Padding" Value="{DynamicResource BasePadding}" />
+		</Style>
+
+		<Style Selector=":is(Layoutable).input-option">
+			<Setter Property="Margin" Value="{DynamicResource InputBigSpacer}" />
+		</Style>
+
+		<Style Selector="ItemsRepeater.rel-paths">
+			<Setter Property="ItemTemplate">
+				<DataTemplate>
+					<ContentControl Classes="rel-path" Content="{Binding}" />
+				</DataTemplate>
+			</Setter>
+			<Setter Property="Layout">
+				<StackLayout Spacing="{DynamicResource InputSmallSpacer}" />
+			</Setter>
+		</Style>
+
+		<Style Selector="ContentControl.rel-path">
+			<Setter Property="ContentTemplate">
+				<DataTemplate>
+					<Expander Name="rExpander" Padding="0" MinHeight="0"
+							HorizontalAlignment="Stretch">
+						<Expander.IsExpanded>
+							<MultiBinding Converter="{x:Static BoolConverters.Or}">
+								<Binding ElementName="rExpander" Path="IsExpanded" />
+								<Binding ElementName="rTextBox" Path="IsFocused" />
+							</MultiBinding>
+						</Expander.IsExpanded>
+
+						<Expander.Header>
+							<TextBox Name="rTextBox" Text="{Binding Value}" />
+						</Expander.Header>
+
+						<Expander.Content>
+							<ItemsRepeater Items="{Binding Paths}">
+								<ItemsRepeater.ItemTemplate>
+									<DataTemplate>
+										<TextBlock Text="{Binding Path}"
+															 Background="{Binding IsValid, Converter={x:Static conv:BrushConverters.FileExists}}" />
+									</DataTemplate>
+								</ItemsRepeater.ItemTemplate>
+							</ItemsRepeater>
+						</Expander.Content>
+					</Expander>
+				</DataTemplate>
+			</Setter>
+		</Style>
+	</Window.Styles>
+
+	<Grid Name="Base" ColumnDefinitions="*,*">
+		<!-- Input -->
+		<Border Grid.Column="0">
+			<Grid RowDefinitions="*,auto,auto">
+				<!-- Settings Only Modifiable Before Searching -->
+				<ScrollViewer Grid.Row="0">
+					<StackPanel IsEnabled="{Binding !Searching.FileSystem}">
+						<HeaderedContentControl Classes="input-option" Header="Base Directory">
+							<Grid ColumnDefinitions="*,auto">
+								<TextBox Text="{Binding Args.BaseDirectory.Value}" TextWrapping="NoWrap" />
+								<Button Grid.Column="1" VerticalAlignment="Stretch" Content="Select"
+												Command="{Binding SelectBaseDirectory}" />
+							</Grid>
+						</HeaderedContentControl>
+
+						<StackPanel Classes="input-option">
+							<HeaderedContentControl Header="Root Directories">
+								<ItemsRepeater Classes="rel-paths" Items="{Binding Args.RootDirectories}" />
+							</HeaderedContentControl>
+
+							<Button Content="Add Root Directory" Command="{Binding AddRootDirectory}" />
+						</StackPanel>
+
+						<StackPanel Classes="input-option">
+							<HeaderedContentControl Header="Source Files">
+								<ItemsRepeater Classes="rel-paths" Items="{Binding Args.SourceFiles}" />
+							</HeaderedContentControl>
+
+							<Button Content="Add Source File" Command="{Binding AddSourceFile}" />
+						</StackPanel>
+
+						<HeaderedContentControl Classes="input-option" Header="Interchangeable File Types">
+							<ItemsRepeater Items="{Binding Args.InterchangeableFileTypes}">
+								<ItemsRepeater.Layout>
+									<StackLayout Spacing="{DynamicResource InputSmallSpacer}" />
+								</ItemsRepeater.Layout>
+
+								<ItemsRepeater.ItemTemplate>
+									<DataTemplate>
+										<ItemsRepeater Items="{Binding}">
+											<ItemsRepeater.Layout>
+												<StackLayout Orientation="Horizontal" />
+											</ItemsRepeater.Layout>
+											<ItemsRepeater.ItemTemplate>
+												<DataTemplate>
+													<TextBox Text="{Binding Value}" />
+												</DataTemplate>
+											</ItemsRepeater.ItemTemplate>
+										</ItemsRepeater>
+									</DataTemplate>
+								</ItemsRepeater.ItemTemplate>
+							</ItemsRepeater>
+						</HeaderedContentControl>
+					</StackPanel>
+				</ScrollViewer>
+
+				<!-- Settings Modifiable At All Times -->
+				<StackPanel Grid.Row="1">
+					<HeaderedContentControl Header="Output Directory">
+						<ContentControl Classes="rel-path" Content="{Binding Args.OutputDirectory}" />
+					</HeaderedContentControl>
+				</StackPanel>
+
+				<!-- Button Ribbon -->
+				<UniformGrid Grid.Row="2" Rows="1">
+					<Button Content="Get Paths" Command="{Binding GetPaths}"
+									IsVisible="{Binding !Searching.Found}" />
+					<Button Content="Clear Paths" Command="{Binding ClearPaths}"
+									IsVisible="{Binding Searching.Found}" />
+				</UniformGrid>
+			</Grid>
+		</Border>
+
+		<!-- Output -->
+		<Border Grid.Column="1">
+			<ScrollViewer>
+				<StackPanel IsVisible="{Binding Searching.Found}">
+					<!-- While Searching -->
+					<StackPanel IsVisible="{Binding GetPaths.IsExecuting^}">
+						<HeaderedContentControl Header="Currently Processing File">
+							<TextBlock Text="{Binding Searching.CurrentFile}" />
+						</HeaderedContentControl>
+
+						<UniformGrid Rows="1">
+							<HeaderedContentControl Header="Found">
+								<TextBlock>
+									<TextBlock.Text>
+										<Binding Path="Searching.Found" StringFormat="​{0} Files" />
+									</TextBlock.Text>
+								</TextBlock>
+							</HeaderedContentControl>
+
+							<HeaderedContentControl Header="Remaining To Check">
+								<TextBlock>
+									<TextBlock.Text>
+										<Binding Path="Searching.Remaining" StringFormat="​{0} Files" />
+									</TextBlock.Text>
+								</TextBlock>
+							</HeaderedContentControl>
+						</UniformGrid>
+					</StackPanel>
+
+					<!-- After Searching -->
+					<StackPanel IsVisible="{Binding !GetPaths.IsExecuting^}">
+						<TextBlock>
+							<TextBlock.Text>
+								<MultiBinding StringFormat="Completed! Found {0} files in {1:N3} seconds.">
+									<Binding Path="Searching.Found" />
+									<Binding Path="Searching.EllapsedTime.TotalSeconds" />
+								</MultiBinding>
+							</TextBlock.Text>
+						</TextBlock>
+					</StackPanel>
+
+					<!-- Output Display -->
+					<TreeView Items="{Binding Searching.FileSystem.Items}">
+						<TreeView.Styles>
+							<Style Selector="TreeViewItem">
+								<Setter Property="IsExpanded" Value="True" />
+							</Style>
+						</TreeView.Styles>
+
+						<TreeView.DataTemplates>
+							<TreeDataTemplate DataType="fs:DirectoryViewModel"
+																ItemsSource="{Binding Items}">
+								<TextBlock Text="{Binding Info.Name}" />
+							</TreeDataTemplate>
+
+							<DataTemplate DataType="fs:FileViewModel">
+								<TextBlock Text="{Binding Info.Name}" />
+							</DataTemplate>
+						</TreeView.DataTemplates>
+					</TreeView>
+				</StackPanel>
+			</ScrollViewer>
+		</Border>
+	</Grid>
+</Window>

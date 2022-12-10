@@ -49,7 +49,7 @@ public record RuntimeArguments(
 
 				return sources;
 			})
-			.SelectMany(x => GathererBase.RootFile(roots, x))
+			.SelectMany(x => roots.RootFile(x))
 			.ToImmutableArray();
 		var baseDirectory = new DirectoryInfo(
 			args.BaseDirectory
