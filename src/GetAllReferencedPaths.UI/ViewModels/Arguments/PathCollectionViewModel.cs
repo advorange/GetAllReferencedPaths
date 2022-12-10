@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
 
-namespace GetAllReferencedPaths.UI.ViewModels;
+namespace GetAllReferencedPaths.UI.ViewModels.Arguments;
 
 public abstract class PathCollectionViewModel : StringWrapper
 {

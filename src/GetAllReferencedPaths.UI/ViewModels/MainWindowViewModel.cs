@@ -1,5 +1,7 @@
 using Avalonia.Controls;
 
+using GetAllReferencedPaths.UI.ViewModels.Arguments;
+
 using ReactiveUI;
 
 using System;
@@ -48,7 +50,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 	public ReactiveCommand<Unit, Unit> SelectBaseDirectory { get; }
 	#endregion Commands
 
-	public MainWindowViewModel(Window window, Arguments args)
+	public MainWindowViewModel(Window window, GetAllReferencedPaths.Arguments args)
 	{
 		_Window = window;
 		Args = new(args);

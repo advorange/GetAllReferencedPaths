@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace GetAllReferencedPaths.UI.ViewModels;
+namespace GetAllReferencedPaths.UI.ViewModels.Arguments;
 
 public sealed class ArgumentsViewModel : ViewModelBase
 {
@@ -11,7 +11,7 @@ public sealed class ArgumentsViewModel : ViewModelBase
 	public ObservableCollection<RootDirectoryViewModel> RootDirectories { get; set; } = new();
 	public ObservableCollection<SourceFileViewModel> SourceFiles { get; set; } = new();
 
-	public ArgumentsViewModel(Arguments args)
+	public ArgumentsViewModel(GetAllReferencedPaths.Arguments args)
 	{
 		BaseDirectory = new(args.BaseDirectory);
 		OutputDirectory = new(BaseDirectory, args.OutputDirectory);
@@ -42,7 +42,7 @@ public sealed class ArgumentsViewModel : ViewModelBase
 	public void AddSourceFile()
 		=> SourceFiles.Add(new(RootDirectories, ""));
 
-	public Arguments ToModel()
+	public GetAllReferencedPaths.Arguments ToModel()
 	{
 		return new(
 			BaseDirectory: BaseDirectory.Value!,

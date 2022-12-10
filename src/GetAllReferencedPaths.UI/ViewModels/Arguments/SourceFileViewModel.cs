@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 
-namespace GetAllReferencedPaths.UI.ViewModels;
+namespace GetAllReferencedPaths.UI.ViewModels.Arguments;
 
 public sealed class SourceFileViewModel : PathCollectionViewModel
 {

@@ -2,7 +2,7 @@
 
 using System.IO;
 
-namespace GetAllReferencedPaths.UI.ViewModels;
+namespace GetAllReferencedPaths.UI.ViewModels.Arguments;
 
 public sealed class RootDirectoryViewModel : PathCollectionViewModel
 {
