@@ -1,0 +1,21 @@
+<ItemsRepeater xmlns="https://github.com/avaloniaui"
+							 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+							 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+							 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+							 xmlns:conv="using:GetAllReferencedPaths.UI.Converters"
+							 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+							 x:Class="GetAllReferencedPaths.UI.Views.RelativePathsRepeater"
+							 Name="Me">
+	<ItemsRepeater.ItemTemplate>
+		<DataTemplate>
+			<Grid ColumnDefinitions="auto,*">
+				<Button Grid.Column="0" Content="X" Foreground="Red"
+								VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+								Command="{Binding #Me.RemoveItem}"
+								CommandParameter="{Binding}" />
+
+				<ContentControl Grid.Column="1" Classes="rel-path" Content="{Binding}" />
+			</Grid>
+		</DataTemplate>
+	</ItemsRepeater.ItemTemplate>
+</ItemsRepeater>

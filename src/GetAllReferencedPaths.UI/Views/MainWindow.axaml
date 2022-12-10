@@ -3,6 +3,7 @@
 				xmlns:vm="using:GetAllReferencedPaths.UI.ViewModels"
 				xmlns:output="using:GetAllReferencedPaths.UI.ViewModels.Output"
 				xmlns:conv="using:GetAllReferencedPaths.UI.Converters"
+				xmlns:controls="using:GetAllReferencedPaths.UI.Views"
 				xmlns:sys="clr-namespace:System;assembly=mscorlib"
 				xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 				xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -27,25 +28,6 @@
 
 		<Style Selector=":is(Layoutable).input-option">
 			<Setter Property="Margin" Value="{DynamicResource InputBigSpacer}" />
-		</Style>
-
-		<Style Selector="ItemsRepeater.rel-paths">
-			<Setter Property="ItemTemplate">
-				<DataTemplate>
-					<Grid ColumnDefinitions="auto,*">
-						<Button Grid.Column="0" Content="X" Foreground="Red"
-										VerticalAlignment="Stretch" VerticalContentAlignment="Center"
-										Command="{Binding #Me.DataContext.RemoveFromOwner}"
-										CommandParameter="{Binding}" />
-
-						<ContentControl Grid.Column="1" Classes="rel-path" Content="{Binding}" />
-					</Grid>
-				</DataTemplate>
-			</Setter>
-
-			<Setter Property="Layout">
-				<StackLayout Spacing="{DynamicResource InputSmallSpacer}" />
-			</Setter>
 		</Style>
 
 		<Style Selector="ContentControl.rel-path">
@@ -103,7 +85,7 @@
 
 						<StackPanel Classes="input-option">
 							<HeaderedContentControl Header="Root Directories">
-								<ItemsRepeater Classes="rel-paths" Items="{Binding Args.RootDirectories}" />
+								<controls:RelativePathsRepeater Items="{Binding Args.RootDirectories}" />
 							</HeaderedContentControl>
 
 							<Button Content="Add Root Directory" Command="{Binding AddRootDirectory}" />
@@ -111,7 +93,7 @@
 
 						<StackPanel Classes="input-option">
 							<HeaderedContentControl Header="Source Files">
-								<ItemsRepeater Classes="rel-paths" Items="{Binding Args.SourceFiles}" />
+								<controls:RelativePathsRepeater Items="{Binding Args.SourceFiles}" />
 							</HeaderedContentControl>
 
 							<Button Content="Add Source File" Command="{Binding AddSourceFile}" />

@@ -14,7 +14,7 @@ public sealed class ArgumentsViewModel : ViewModelBase
 	public ArgumentsViewModel(GetAllReferencedPaths.Arguments args)
 	{
 		BaseDirectory = new(args.BaseDirectory);
-		OutputDirectory = new(this, args.OutputDirectory);
+		OutputDirectory = new(BaseDirectory, args.OutputDirectory);
 
 		foreach (var item in args.RootDirectories)
 		{
@@ -37,10 +37,10 @@ public sealed class ArgumentsViewModel : ViewModelBase
 	}
 
 	public void AddRootDirectory(string value = "")
-		=> RootDirectories.Add(new(this, value));
+		=> RootDirectories.Add(new(BaseDirectory, value));
 
 	public void AddSourceFile(string value = "")
-		=> SourceFiles.Add(new(this, value));
+		=> SourceFiles.Add(new(BaseDirectory, RootDirectories, value));
 
 	public GetAllReferencedPaths.Arguments ToModel()
 	{

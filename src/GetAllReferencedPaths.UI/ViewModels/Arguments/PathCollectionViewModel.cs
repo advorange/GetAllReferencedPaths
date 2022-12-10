@@ -1,16 +1,13 @@
 ﻿using ReactiveUI;
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reactive.Linq;
 
 namespace GetAllReferencedPaths.UI.ViewModels.Arguments;
 
-public abstract class PathCollectionViewModel : StringWrapper, ICanDetach
+public abstract class PathCollectionViewModel : StringWrapper
 {
-	private readonly IList? _Owner;
-
 	private IReadOnlyList<PathViewModel> _Paths = Array.Empty<PathViewModel>();
 
 	public IReadOnlyList<PathViewModel> Paths
@@ -19,13 +16,9 @@ public abstract class PathCollectionViewModel : StringWrapper, ICanDetach
 		protected set => this.RaiseAndSetIfChanged(ref _Paths, value);
 	}
 
-	protected PathCollectionViewModel(IList? owner, string value) : base(value)
+	protected PathCollectionViewModel(string value) : base(value)
 	{
-		_Owner = owner;
 	}
-
-	void ICanDetach.RemoveFromOwner()
-		=> _Owner?.Remove(this);
 
 	protected IDisposable BindToPaths<T>(
 		IObservable<T> observable,
