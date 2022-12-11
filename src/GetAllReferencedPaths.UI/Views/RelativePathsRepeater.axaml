@@ -9,12 +9,11 @@
 	<ItemsRepeater.ItemTemplate>
 		<DataTemplate>
 			<Grid ColumnDefinitions="auto,*">
-				<Button Grid.Column="0" Content="X" Foreground="Red"
-								VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+				<Button Grid.Column="0" Classes="delete"
 								Command="{Binding #Me.RemoveItem}"
 								CommandParameter="{Binding}" />
 
-				<ContentControl Grid.Column="1" Classes="rel-path" Content="{Binding}" />
+				<ContentControl Grid.Column="1" Name="Content" Content="{Binding}" />
 			</Grid>
 		</DataTemplate>
 	</ItemsRepeater.ItemTemplate>

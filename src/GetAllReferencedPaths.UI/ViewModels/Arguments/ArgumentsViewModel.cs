@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Text.Json;
 
 using Args = GetAllReferencedPaths.Arguments;
@@ -18,12 +19,14 @@ public sealed class ArgumentsViewModel : ViewModelBase
 	};
 
 	public StringWrapper BaseDirectory { get; }
-	public ObservableCollection<ObservableCollection<StringWrapper>> InterchangeableFileTypes { get; } = new();
+	public ObservableCollection<FileTypeGroupViewModel> InterchangeableFileTypes { get; } = new();
 	public RootDirectoryViewModel OutputDirectory { get; }
 	public ObservableCollection<RootDirectoryViewModel> RootDirectories { get; } = new();
 	public ObservableCollection<SourceFileViewModel> SourceFiles { get; } = new();
 
 	#region Commands
+	public ReactiveCommand<FileTypeGroupViewModel, Unit> NewFileType { get; }
+	public ReactiveCommand<Unit, Unit> NewFileTypeGroup { get; }
 	public ReactiveCommand<Unit, Unit> NewRootDirectory { get; }
 	public ReactiveCommand<Unit, Unit> NewSourceFile { get; }
 	#endregion Commands
@@ -44,7 +47,7 @@ public sealed class ArgumentsViewModel : ViewModelBase
 
 		foreach (var set in args.InterchangeableFileTypes)
 		{
-			var list = new ObservableCollection<StringWrapper>();
+			var list = new FileTypeGroupViewModel();
 			foreach (var item in set)
 			{
 				list.Add(new(item));
@@ -54,6 +57,14 @@ public sealed class ArgumentsViewModel : ViewModelBase
 
 		NewRootDirectory = ReactiveCommand.Create(() => AddRootDirectory());
 		NewSourceFile = ReactiveCommand.Create(() => AddSourceFile());
+		NewFileTypeGroup = ReactiveCommand.Create(() =>
+		{
+			InterchangeableFileTypes.Add(new());
+		});
+		NewFileType = ReactiveCommand.Create<FileTypeGroupViewModel>(collection =>
+		{
+			collection.Add(new(""));
+		});
 	}
 
 	public static ArgumentsViewModel Load(string path)

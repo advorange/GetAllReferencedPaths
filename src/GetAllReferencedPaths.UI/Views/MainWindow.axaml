@@ -1,10 +1,12 @@
 <Window xmlns="https://github.com/avaloniaui"
 				xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+				xmlns:conv="using:GetAllReferencedPaths.UI.Converters"
 				xmlns:vm="using:GetAllReferencedPaths.UI.ViewModels"
 				xmlns:output="using:GetAllReferencedPaths.UI.ViewModels.Output"
-				xmlns:conv="using:GetAllReferencedPaths.UI.Converters"
+				xmlns:argsvm="using:GetAllReferencedPaths.UI.ViewModels.Arguments"
 				xmlns:controls="using:GetAllReferencedPaths.UI.Views"
 				xmlns:sys="clr-namespace:System;assembly=mscorlib"
+				xmlns:sc="clr-namespace:System.Collections;assembly=mscorlib"
 				xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 				xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 				mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -15,7 +17,6 @@
 
 	<Window.Resources>
 		<ResourceDictionary>
-			<sys:Int32 x:Key="InputSmallSpacer">5</sys:Int32>
 			<Thickness x:Key="InputBigSpacer">0,0,0,10</Thickness>
 			<Thickness x:Key="BasePadding">10</Thickness>
 		</ResourceDictionary>
@@ -30,17 +31,64 @@
 			<Setter Property="Margin" Value="{DynamicResource InputBigSpacer}" />
 		</Style>
 
-		<Style Selector="ContentControl.rel-path">
+		<Style Selector="Button.delete">
+			<Setter Property="Content" Value="X" />
+			<Setter Property="Foreground" Value="Red" />
+			<Setter Property="VerticalAlignment" Value="Stretch" />
+			<Setter Property="VerticalContentAlignment" Value="Stretch" />
+		</Style>
+
+		<Style Selector="TextBox.input-display">
+			<Setter Property="IsHitTestVisible" Value="False" />
+			<Setter Property="IsReadOnly" Value="True" />
+			<Setter Property="TextWrapping" Value="Wrap" />
+		</Style>
+
+		<Style Selector="Expander#rExpander">
+			<Setter Property="Padding" Value="0" />
+			<Setter Property="MinHeight" Value="0" />
+			<Setter Property="HorizontalAlignment" Value="Stretch" />
+		</Style>
+
+		<Style Selector="Expander#rExpander ToggleButton#ExpanderHeader">
+			<Setter Property="Padding" Value="0" />
+		</Style>
+
+		<Style Selector=":is(ItemsRepeater).file-types ContentControl#Content">
 			<Setter Property="ContentTemplate">
 				<DataTemplate>
-					<Expander Name="rExpander" Padding="0" MinHeight="0"
-										HorizontalAlignment="Stretch">
-						<Expander.Styles>
-							<Style Selector="ToggleButton#ExpanderHeader">
-								<Setter Property="Padding" Value="0" />
-							</Style>
-						</Expander.Styles>
+					<Expander Name="rExpander">
+						<Expander.Header>
+							<Grid ColumnDefinitions="*,auto">
+								<TextBox Grid.Column="0" Classes="input-display"
+												 Text="{Binding Display}" />
 
+								<Button Grid.Column="1" Content="+"
+												Command="{Binding #Me.DataContext.Args.NewFileType}"
+												CommandParameter="{Binding}" />
+							</Grid>
+						</Expander.Header>
+
+						<Expander.Content>
+							<controls:RelativePathsRepeater Classes="extensions" Items="{Binding}" />
+						</Expander.Content>
+					</Expander>
+				</DataTemplate>
+			</Setter>
+		</Style>
+
+		<Style Selector=":is(ItemsRepeater).extensions ContentControl#Content">
+			<Setter Property="ContentTemplate">
+				<DataTemplate>
+					<TextBox Text="{Binding Value}" />
+				</DataTemplate>
+			</Setter>
+		</Style>
+
+		<Style Selector=":is(ItemsRepeater).rel-paths ContentControl#Content, ContentControl.rel-path">
+			<Setter Property="ContentTemplate">
+				<DataTemplate>
+					<Expander Name="rExpander">
 						<Expander.IsExpanded>
 							<MultiBinding Converter="{x:Static BoolConverters.Or}">
 								<Binding Path="#rExpander.IsExpanded" />
@@ -77,8 +125,8 @@
 					<StackPanel IsEnabled="{Binding !OutputActive^}">
 						<HeaderedContentControl Classes="input" Header="Base Directory">
 							<Grid ColumnDefinitions="*,auto">
-								<TextBox Text="{Binding Args.BaseDirectory.Value}" TextWrapping="NoWrap"
-												 IsReadOnly="True" IsHitTestVisible="False" />
+								<TextBox Classes="input-display"
+												 Text="{Binding Args.BaseDirectory.Value}" />
 								<Button Grid.Column="1" VerticalAlignment="Stretch" Content="Select"
 												Command="{Binding SelectBaseDirectory}" />
 							</Grid>
@@ -86,43 +134,31 @@
 
 						<StackPanel Classes="input">
 							<HeaderedContentControl Header="Root Directories">
-								<controls:RelativePathsRepeater Items="{Binding Args.RootDirectories}" />
+								<controls:RelativePathsRepeater Classes="rel-paths"
+																								Items="{Binding Args.RootDirectories}" />
 							</HeaderedContentControl>
 
-							<Button Content="Add Root Directory" Command="{Binding Args.NewRootDirectory}" />
+							<Button Content="New Root Directory" Command="{Binding Args.NewRootDirectory}" />
 						</StackPanel>
 
 						<StackPanel Classes="input">
 							<HeaderedContentControl Header="Source Files">
-								<controls:RelativePathsRepeater Items="{Binding Args.SourceFiles}" />
+								<controls:RelativePathsRepeater Classes="rel-paths"
+																								Items="{Binding Args.SourceFiles}" />
 							</HeaderedContentControl>
 
-							<Button Content="Add Source File" Command="{Binding Args.NewSourceFile}" />
+							<Button Content="New Source File" Command="{Binding Args.NewSourceFile}" />
 						</StackPanel>
 
-						<HeaderedContentControl Classes="input" Header="Interchangeable File Types">
-							<ItemsRepeater Items="{Binding Args.InterchangeableFileTypes}">
-								<ItemsRepeater.Layout>
-									<StackLayout Spacing="{DynamicResource InputSmallSpacer}" />
-								</ItemsRepeater.Layout>
+						<StackPanel Classes="input">
+							<HeaderedContentControl Header="Interchangeable File Types">
+								<controls:RelativePathsRepeater Classes="file-types"
+																								Items="{Binding Args.InterchangeableFileTypes}" />
+							</HeaderedContentControl>
 
-								<ItemsRepeater.ItemTemplate>
-									<DataTemplate>
-										<ItemsRepeater Items="{Binding}">
-											<ItemsRepeater.Layout>
-												<StackLayout Orientation="Horizontal" />
-											</ItemsRepeater.Layout>
-
-											<ItemsRepeater.ItemTemplate>
-												<DataTemplate>
-													<TextBox Text="{Binding Value}" />
-												</DataTemplate>
-											</ItemsRepeater.ItemTemplate>
-										</ItemsRepeater>
-									</DataTemplate>
-								</ItemsRepeater.ItemTemplate>
-							</ItemsRepeater>
-						</HeaderedContentControl>
+							<Button Content="New Interchangeable File Types Group"
+											Command="{Binding Args.NewFileTypeGroup}" />
+						</StackPanel>
 					</StackPanel>
 				</ScrollViewer>
 
