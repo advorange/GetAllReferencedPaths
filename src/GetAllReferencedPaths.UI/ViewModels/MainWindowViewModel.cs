@@ -66,12 +66,8 @@ public sealed class MainWindowViewModel : ViewModelBase
 		return Task.CompletedTask;
 	}
 
-	private Task CopyResultsAsync()
+	private async Task CopyResultsAsync()
 	{
-		var baseDir = Args.BaseDirectory.Value!;
-		var outDir = Args.OutputDirectory.Value!;
-		var time = DateTime.Now.ToString("s").Replace(':', '.')!;
-
 		static IEnumerable<FileViewModel> EnumerateFiles(DirectoryViewModel dir)
 		{
 			foreach (var file in dir.Files)
@@ -87,6 +83,9 @@ public sealed class MainWindowViewModel : ViewModelBase
 			}
 		}
 
+		var baseDir = Args.BaseDirectory.Value!;
+		var outDir = Args.OutputDirectory.Value!;
+		var time = DateTime.Now.ToString("s").Replace(':', '.')!;
 		var files = EnumerateFiles(Results.Output!).ToList();
 
 		// reset each IsCopied to false in case the user clicks copy multiple times
@@ -105,11 +104,13 @@ public sealed class MainWindowViewModel : ViewModelBase
 				file.Relative
 			);
 			Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
-			File.Copy(file.Info.FullName, destination);
+
+			using var inputStream = file.Info.OpenRead();
+			using var outputStream = File.Create(destination);
+			await inputStream.CopyToAsync(outputStream).ConfigureAwait(true);
+
 			file.IsCopied = true;
 		}
-
-		return Task.CompletedTask;
 	}
 
 	private async Task GetPathsAsync()
