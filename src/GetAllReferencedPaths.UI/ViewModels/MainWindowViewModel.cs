@@ -103,12 +103,9 @@ public sealed class MainWindowViewModel : ViewModelBase
 				time,
 				file.Relative
 			);
+
 			Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
-
-			using var inputStream = file.Info.OpenRead();
-			using var outputStream = File.Create(destination);
-			await inputStream.CopyToAsync(outputStream).ConfigureAwait(true);
-
+			await UIUtils.CopyFileAsync(file.Info.FullName, destination).ConfigureAwait(true);
 			file.IsCopied = true;
 		}
 	}
