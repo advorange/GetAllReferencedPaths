@@ -4,7 +4,7 @@
 				xmlns:vm="using:GetAllReferencedPaths.UI.ViewModels"
 				xmlns:output="using:GetAllReferencedPaths.UI.ViewModels.Output"
 				xmlns:argsvm="using:GetAllReferencedPaths.UI.ViewModels.Arguments"
-				xmlns:controls="using:GetAllReferencedPaths.UI.Views"
+				xmlns:con="using:GetAllReferencedPaths.UI.Views"
 				xmlns:sys="clr-namespace:System;assembly=mscorlib"
 				xmlns:sc="clr-namespace:System.Collections;assembly=mscorlib"
 				xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -70,7 +70,7 @@
 						</Expander.Header>
 
 						<Expander.Content>
-							<controls:RelativePathsRepeater Classes="extensions" Items="{Binding}" />
+							<con:RemovableItemsRepeater Classes="extensions" Items="{Binding}" />
 						</Expander.Content>
 					</Expander>
 				</DataTemplate>
@@ -134,8 +134,8 @@
 
 						<StackPanel Classes="input">
 							<HeaderedContentControl Header="Root Directories">
-								<controls:RelativePathsRepeater Classes="rel-paths"
-																								Items="{Binding Args.RootDirectories}" />
+								<con:RemovableItemsRepeater Classes="rel-paths"
+																						Items="{Binding Args.RootDirectories}" />
 							</HeaderedContentControl>
 
 							<Button Content="New Root Directory" Command="{Binding Args.NewRootDirectory}" />
@@ -143,8 +143,8 @@
 
 						<StackPanel Classes="input">
 							<HeaderedContentControl Header="Source Files">
-								<controls:RelativePathsRepeater Classes="rel-paths"
-																								Items="{Binding Args.SourceFiles}" />
+								<con:RemovableItemsRepeater Classes="rel-paths"
+																						Items="{Binding Args.SourceFiles}" />
 							</HeaderedContentControl>
 
 							<Button Content="New Source File" Command="{Binding Args.NewSourceFile}" />
@@ -152,8 +152,8 @@
 
 						<StackPanel Classes="input">
 							<HeaderedContentControl Header="Interchangeable File Types">
-								<controls:RelativePathsRepeater Classes="file-types"
-																								Items="{Binding Args.InterchangeableFileTypes}" />
+								<con:RemovableItemsRepeater Classes="file-types"
+																						Items="{Binding Args.InterchangeableFileTypes}" />
 							</HeaderedContentControl>
 
 							<Button Content="New Interchangeable File Types Group"

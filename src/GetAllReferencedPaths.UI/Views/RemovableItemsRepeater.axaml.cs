@@ -4,9 +4,9 @@ using System.Collections;
 
 namespace GetAllReferencedPaths.UI.Views;
 
-public partial class RelativePathsRepeater : ItemsRepeater
+public partial class RemovableItemsRepeater : ItemsRepeater
 {
-	public RelativePathsRepeater()
+	public RemovableItemsRepeater()
 	{
 		InitializeComponent();
 	}
