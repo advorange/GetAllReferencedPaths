@@ -22,13 +22,11 @@ public abstract class PathCollectionViewModel : StringWrapper
 
 	protected IDisposable BindToPaths<T>(
 		IObservable<T> observable,
-		Func<T, string, IReadOnlyList<PathViewModel>> selector)
+		Func<string, T, IReadOnlyList<PathViewModel>> selector)
 	{
-		var valueChanged = this.WhenAnyValue(x => x.Value);
-		return observable.CombineLatest(valueChanged).Select(tuple =>
-		{
-			var (dir, val) = tuple;
-			return selector(dir, val);
-		}).Subscribe(x => Paths = x);
+		return this
+			.WhenAnyValue(x => x.Value)
+			.CombineLatest(observable, selector)
+			.Subscribe(x => Paths = x);
 	}
 }

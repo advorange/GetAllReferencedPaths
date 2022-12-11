@@ -30,12 +30,12 @@ public sealed class MainWindowViewModel : ViewModelBase
 	}
 
 	#region IObservables
-	public IObservable<bool> ResultsActive { get; }
+	public IObservable<bool> OutputActive { get; }
 	#endregion IObservables
 
 	#region Commands
 	public ReactiveCommand<Unit, Unit> ClearResults { get; }
-	public ReactiveCommand<Unit, Unit> CopyFiles { get; }
+	public ReactiveCommand<Unit, Unit> CopyResults { get; }
 	public ReactiveCommand<Unit, Unit> GetPaths { get; }
 	public ReactiveCommand<Unit, Unit> SelectBaseDirectory { get; }
 	#endregion Commands
@@ -45,16 +45,19 @@ public sealed class MainWindowViewModel : ViewModelBase
 		_Window = window;
 		Args = args;
 
-		ResultsActive = this
+		OutputActive = this
 			.WhenAnyValue(x => x.Results.Found)
 			.Select(x => x != 0);
 
-		ClearResults = ReactiveCommand.CreateFromTask(ClearResultsAsync, ResultsActive);
-		CopyFiles = ReactiveCommand.CreateFromTask(CopyFilesAsync, ResultsActive);
+		ClearResults = ReactiveCommand.CreateFromTask(ClearResultsAsync, OutputActive);
 
-		var resultsInactive = ResultsActive.Select(x => !x);
-		GetPaths = ReactiveCommand.CreateFromTask(GetPathsAsync, resultsInactive);
-		SelectBaseDirectory = ReactiveCommand.CreateFromTask(SelectBaseDirectoryAsync, resultsInactive);
+		var outputInactive = OutputActive.Select(x => !x);
+		GetPaths = ReactiveCommand.CreateFromTask(GetPathsAsync, outputInactive);
+		SelectBaseDirectory = ReactiveCommand.CreateFromTask(SelectBaseDirectoryAsync, outputInactive);
+
+		var outputCopyable = OutputActive
+			.CombineLatest(GetPaths.IsExecuting, (act, exe) => act && !exe);
+		CopyResults = ReactiveCommand.CreateFromTask(CopyResultsAsync, outputCopyable);
 	}
 
 	private Task ClearResultsAsync()
@@ -63,27 +66,29 @@ public sealed class MainWindowViewModel : ViewModelBase
 		return Task.CompletedTask;
 	}
 
-	private Task CopyFilesAsync()
+	private Task CopyResultsAsync()
 	{
 		var baseDir = Args.BaseDirectory.Value!;
+		var outDir = Args.OutputDirectory.Value!;
 		var time = DateTime.Now.ToString("s").Replace(':', '.')!;
 
-		void CopyFiles(DirectoryViewModel dirVM)
+		void CopyFiles(DirectoryViewModel dir)
 		{
-			foreach (var file in dirVM.Files)
+			foreach (var file in dir.Files)
 			{
 				var destination = Path.Combine(
 					baseDir,
+					outDir,
 					time,
 					file.Relative
 				);
 				Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
 				File.Copy(file.Info.FullName, destination);
-				Debug.WriteLine($"Copied: {file.Relative} -> {destination}");
+				file.IsCopied = true;
 			}
-			foreach (var dir in dirVM.Subdirectories)
+			foreach (var subdir in dir.Subdirectories)
 			{
-				CopyFiles(dir);
+				CopyFiles(subdir);
 			}
 		}
 

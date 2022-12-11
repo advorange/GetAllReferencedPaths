@@ -20,7 +20,7 @@ public sealed class SourceFileViewModel : PathCollectionViewModel
 			.ToObservableChangeSet()
 			.AutoRefresh(x => x.Paths)
 			.ToCollection();
-		BindToPaths(rootsChange, (roots, val) =>
+		BindToPaths(rootsChange, (val, roots) =>
 		{
 			return roots
 				.SelectMany(r => r.Paths.Select(p => new DirectoryInfo(p.Path)))

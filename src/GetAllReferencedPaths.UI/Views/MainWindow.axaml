@@ -56,8 +56,8 @@
 							<ItemsRepeater Items="{Binding Paths}">
 								<ItemsRepeater.ItemTemplate>
 									<DataTemplate>
-										<TextBlock Text="{Binding Path}"
-															 Background="{Binding IsValid, Converter={x:Static conv:BrushConverters.FileExists}}" />
+										<TextBlock Text="{Binding Path}" TextWrapping="Wrap"
+															 Background="{Binding PathExists^, Converter={x:Static conv:BrushConverters.FileExists}}" />
 									</DataTemplate>
 								</ItemsRepeater.ItemTemplate>
 							</ItemsRepeater>
@@ -74,7 +74,7 @@
 			<Grid RowDefinitions="*,auto,auto">
 				<!-- Settings Only Modifiable Before Searching -->
 				<ScrollViewer Grid.Row="0">
-					<StackPanel IsEnabled="{Binding !ResultsActive^}">
+					<StackPanel IsEnabled="{Binding !OutputActive^}">
 						<HeaderedContentControl Classes="input" Header="Base Directory">
 							<Grid ColumnDefinitions="*,auto">
 								<TextBox Text="{Binding Args.BaseDirectory.Value}" TextWrapping="NoWrap"
@@ -134,19 +134,22 @@
 				</StackPanel>
 
 				<!-- Button Ribbon -->
-				<UniformGrid Grid.Row="2" Rows="1">
+				<StackPanel Grid.Row="2" Orientation="Horizontal">
 					<Button Content="Get Paths" Command="{Binding GetPaths}"
-									IsVisible="{Binding !ResultsActive^}" />
+									IsVisible="{Binding !OutputActive^}" />
+
 					<Button Content="Clear Results" Command="{Binding ClearResults}"
-									IsVisible="{Binding ResultsActive^}" />
-				</UniformGrid>
+									IsVisible="{Binding OutputActive^}" />
+					<Button Content="Copy Results" Command="{Binding CopyResults}"
+									IsVisible="{Binding OutputActive^}" />
+				</StackPanel>
 			</Grid>
 		</Border>
 
 		<!-- Output -->
 		<Border Grid.Column="1">
 			<ScrollViewer>
-				<StackPanel IsVisible="{Binding ResultsActive^}">
+				<StackPanel IsVisible="{Binding OutputActive^}">
 					<!-- While Searching -->
 					<StackPanel IsVisible="{Binding GetPaths.IsExecuting^}">
 						<HeaderedContentControl Header="Currently Processing File">
@@ -199,7 +202,8 @@
 							</TreeDataTemplate>
 
 							<DataTemplate DataType="output:FileViewModel">
-								<TextBlock Text="{Binding Info.Name}" />
+								<TextBlock Text="{Binding Info.Name}"
+													 Background="{Binding IsCopied, Converter={x:Static conv:BrushConverters.FileExists}}" />
 							</DataTemplate>
 						</TreeView.DataTemplates>
 					</TreeView>
