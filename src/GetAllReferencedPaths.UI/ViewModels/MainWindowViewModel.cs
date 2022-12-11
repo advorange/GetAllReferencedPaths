@@ -72,27 +72,43 @@ public sealed class MainWindowViewModel : ViewModelBase
 		var outDir = Args.OutputDirectory.Value!;
 		var time = DateTime.Now.ToString("s").Replace(':', '.')!;
 
-		void CopyFiles(DirectoryViewModel dir)
+		static IEnumerable<FileViewModel> EnumerateFiles(DirectoryViewModel dir)
 		{
 			foreach (var file in dir.Files)
 			{
-				var destination = Path.Combine(
-					baseDir,
-					outDir,
-					time,
-					file.Relative
-				);
-				Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
-				File.Copy(file.Info.FullName, destination);
-				file.IsCopied = true;
+				yield return file;
 			}
 			foreach (var subdir in dir.Subdirectories)
 			{
-				CopyFiles(subdir);
+				foreach (var file in EnumerateFiles(subdir))
+				{
+					yield return file;
+				}
 			}
 		}
 
-		CopyFiles(Results.Output!);
+		var files = EnumerateFiles(Results.Output!).ToList();
+
+		// reset each IsCopied to false in case the user clicks copy multiple times
+		// otherwise if 1st copy is successful but subsequent ones arent the
+		// failed copies will look successful
+		foreach (var file in files)
+		{
+			file.IsCopied = false;
+		}
+		foreach (var file in files)
+		{
+			var destination = Path.Combine(
+				baseDir,
+				outDir,
+				time,
+				file.Relative
+			);
+			Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+			File.Copy(file.Info.FullName, destination);
+			file.IsCopied = true;
+		}
+
 		return Task.CompletedTask;
 	}
 
