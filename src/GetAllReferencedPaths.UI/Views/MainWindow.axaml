@@ -204,8 +204,14 @@
 							</TreeDataTemplate>
 
 							<DataTemplate DataType="output:FileViewModel">
-								<TextBlock Text="{Binding Info.Name}"
-													 Background="{Binding IsCopied, Converter={x:Static conv:BrushConverters.FileExists}}" />
+								<TextBlock Background="{Binding IsCopied, Converter={x:Static conv:BrushConverters.FileExists}}">
+									<TextBlock.Text>
+										<MultiBinding StringFormat="​{0} ({1:N0} bytes)">
+											<Binding Path="Info.Name" />
+											<Binding Path="Info.Length" />
+										</MultiBinding>
+									</TextBlock.Text>
+								</TextBlock>
 							</DataTemplate>
 						</TreeView.DataTemplates>
 					</TreeView>
