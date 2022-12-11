@@ -1,0 +1,22 @@
+﻿{
+	"BaseDirectory": "C:\\Users\\User\\Source\\Repos\\GetAllReferencedPaths\\src\\GetAllReferencedPaths.UI\\Assets\\SampleData",
+	"InterchangeableFileTypes": [
+		[
+			".jsim",
+			".jresource"
+		],
+		[
+			".xyz",
+			".xyz2",
+			".xyz3"
+		]
+	],
+	"OutputDirectory": "../Output",
+	"RootDirectories": [
+		"./sim",
+		"./game"
+	],
+	"SourceFiles": [
+		"./input.jsim"
+	]
+}

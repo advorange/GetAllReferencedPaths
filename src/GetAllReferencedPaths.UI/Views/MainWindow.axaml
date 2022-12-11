@@ -74,7 +74,7 @@
 			<Grid RowDefinitions="*,auto,auto">
 				<!-- Settings Only Modifiable Before Searching -->
 				<ScrollViewer Grid.Row="0">
-					<StackPanel IsEnabled="{Binding !Results.Found}">
+					<StackPanel IsEnabled="{Binding !ResultsActive^}">
 						<HeaderedContentControl Classes="input" Header="Base Directory">
 							<Grid ColumnDefinitions="*,auto">
 								<TextBox Text="{Binding Args.BaseDirectory.Value}" TextWrapping="NoWrap"
@@ -136,9 +136,9 @@
 				<!-- Button Ribbon -->
 				<UniformGrid Grid.Row="2" Rows="1">
 					<Button Content="Get Paths" Command="{Binding GetPaths}"
-									IsVisible="{Binding !Results.Found}" />
+									IsVisible="{Binding !ResultsActive^}" />
 					<Button Content="Clear Results" Command="{Binding ClearResults}"
-									IsVisible="{Binding Results.Found}" />
+									IsVisible="{Binding ResultsActive^}" />
 				</UniformGrid>
 			</Grid>
 		</Border>
@@ -146,7 +146,7 @@
 		<!-- Output -->
 		<Border Grid.Column="1">
 			<ScrollViewer>
-				<StackPanel IsVisible="{Binding Results.Found}">
+				<StackPanel IsVisible="{Binding ResultsActive^}">
 					<!-- While Searching -->
 					<StackPanel IsVisible="{Binding GetPaths.IsExecuting^}">
 						<HeaderedContentControl Header="Currently Processing File">

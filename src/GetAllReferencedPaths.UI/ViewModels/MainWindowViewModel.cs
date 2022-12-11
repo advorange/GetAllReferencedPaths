@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 namespace GetAllReferencedPaths.UI.ViewModels;
@@ -28,6 +29,10 @@ public sealed class MainWindowViewModel : ViewModelBase
 		set => this.RaiseAndSetIfChanged(ref _Searching, value);
 	}
 
+	#region IObservables
+	public IObservable<bool> ResultsActive { get; }
+	#endregion IObservables
+
 	#region Commands
 	public ReactiveCommand<Unit, Unit> ClearResults { get; }
 	public ReactiveCommand<Unit, Unit> CopyFiles { get; }
@@ -40,10 +45,16 @@ public sealed class MainWindowViewModel : ViewModelBase
 		_Window = window;
 		Args = args;
 
-		ClearResults = ReactiveCommand.CreateFromTask(ClearResultsAsync);
-		CopyFiles = ReactiveCommand.CreateFromTask(CopyFilesAsync);
-		GetPaths = ReactiveCommand.CreateFromTask(GetPathsAsync);
-		SelectBaseDirectory = ReactiveCommand.CreateFromTask(SelectBaseDirectoryAsync);
+		ResultsActive = this
+			.WhenAnyValue(x => x.Results.Found)
+			.Select(x => x != 0);
+
+		ClearResults = ReactiveCommand.CreateFromTask(ClearResultsAsync, ResultsActive);
+		CopyFiles = ReactiveCommand.CreateFromTask(CopyFilesAsync, ResultsActive);
+
+		var resultsInactive = ResultsActive.Select(x => !x);
+		GetPaths = ReactiveCommand.CreateFromTask(GetPathsAsync, resultsInactive);
+		SelectBaseDirectory = ReactiveCommand.CreateFromTask(SelectBaseDirectoryAsync, resultsInactive);
 	}
 
 	private Task ClearResultsAsync()
