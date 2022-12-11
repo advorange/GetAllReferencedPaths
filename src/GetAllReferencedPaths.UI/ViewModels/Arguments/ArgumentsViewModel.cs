@@ -59,11 +59,15 @@ public sealed class ArgumentsViewModel : ViewModelBase
 		NewSourceFile = ReactiveCommand.Create(() => AddSourceFile());
 		NewFileTypeGroup = ReactiveCommand.Create(() =>
 		{
-			InterchangeableFileTypes.Add(new());
+			InterchangeableFileTypes.Add(new()
+			{
+				new(""),
+				new(""),
+			});
 		});
-		NewFileType = ReactiveCommand.Create<FileTypeGroupViewModel>(collection =>
+		NewFileType = ReactiveCommand.Create<FileTypeGroupViewModel>(group =>
 		{
-			collection.Add(new(""));
+			group.Add(new(""));
 		});
 	}
 
