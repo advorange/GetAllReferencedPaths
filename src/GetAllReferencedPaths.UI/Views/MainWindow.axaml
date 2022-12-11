@@ -77,7 +77,8 @@
 					<StackPanel IsEnabled="{Binding !Results.Found}">
 						<HeaderedContentControl Classes="input" Header="Base Directory">
 							<Grid ColumnDefinitions="*,auto">
-								<TextBox Text="{Binding Args.BaseDirectory.Value}" TextWrapping="NoWrap" />
+								<TextBox Text="{Binding Args.BaseDirectory.Value}" TextWrapping="NoWrap"
+												 IsReadOnly="True" IsHitTestVisible="False" />
 								<Button Grid.Column="1" VerticalAlignment="Stretch" Content="Select"
 												Command="{Binding SelectBaseDirectory}" />
 							</Grid>
