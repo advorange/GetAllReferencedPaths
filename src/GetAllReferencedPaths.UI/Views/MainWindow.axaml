@@ -31,46 +31,47 @@
 			<Setter Property="Margin" Value="{DynamicResource InputBigSpacer}" />
 		</Style>
 
+		<!-- Button indicating an item will be removed -->
 		<Style Selector="Button.delete">
 			<Setter Property="Content" Value="X" />
 			<Setter Property="Foreground" Value="Red" />
 			<Setter Property="VerticalAlignment" Value="Top" />
-			<Setter Property="BorderThickness" Value="1" />
 		</Style>
 
+		<!-- Readonly display of a value -->
 		<Style Selector="TextBox.input-display">
 			<Setter Property="IsHitTestVisible" Value="False" />
 			<Setter Property="IsReadOnly" Value="True" />
 			<Setter Property="TextWrapping" Value="Wrap" />
 		</Style>
 
-		<Style Selector="Expander.input-display">
+		<!-- Changes to make an expander show as much of the header as possible -->
+		<Style Selector="Expander.input">
 			<Setter Property="Padding" Value="0" />
 			<Setter Property="MinHeight" Value="0" />
 			<Setter Property="HorizontalAlignment" Value="Stretch" />
 		</Style>
 
-		<Style Selector="Expander.input-display ToggleButton#ExpanderHeader">
+		<!-- Remove empty space to the left of the header -->
+		<Style Selector="Expander.input ToggleButton#ExpanderHeader">
 			<Setter Property="Padding" Value="0" />
 		</Style>
 
-		<Style Selector="Expander.input-display ToggleButton#ExpanderHeader Grid Border">
+		<!-- Remove empty space around the toggle button -->
+		<Style Selector="Expander.input ToggleButton#ExpanderHeader Grid Border">
 			<Setter Property="Margin" Value="0" />
 		</Style>
 
-		<Style Selector="Expander.input-display:expanded /template/ ToggleButton#ExpanderHeader">
-			<Setter Property="BorderThickness" Value="0" />
-		</Style>
-
-		<Style Selector="Expander.input-display:expanded /template/ Border#ExpanderContent">
-			<Setter Property="BorderThickness" Value="0" />
+		<!-- Remove background from expanded content -->
+		<Style Selector="Expander.input:expanded /template/ Border#ExpanderContent">
 			<Setter Property="Background" Value="Transparent" />
 		</Style>
 
+		<!-- Display an interchangeable file type group -->
 		<Style Selector=":is(ItemsRepeater).file-types ContentControl#Content">
 			<Setter Property="ContentTemplate">
 				<DataTemplate>
-					<Expander Classes="input-display">
+					<Expander Classes="input">
 						<Expander.Header>
 							<Grid ColumnDefinitions="*,auto">
 								<TextBox Grid.Column="0" Classes="input-display"
@@ -90,6 +91,7 @@
 			</Setter>
 		</Style>
 
+		<!-- Display a list of extensions -->
 		<Style Selector=":is(ItemsRepeater).extensions ContentControl#Content">
 			<Setter Property="ContentTemplate">
 				<DataTemplate>
@@ -98,10 +100,11 @@
 			</Setter>
 		</Style>
 
+		<!-- Display relative paths and their in/valid results -->
 		<Style Selector=":is(ItemsRepeater).rel-paths ContentControl#Content, ContentControl.rel-path">
 			<Setter Property="ContentTemplate">
 				<DataTemplate>
-					<Expander Classes="input-display" Name="rExpander">
+					<Expander Classes="input" Name="rExpander">
 						<Expander.IsExpanded>
 							<MultiBinding Converter="{x:Static BoolConverters.Or}">
 								<Binding Path="#rExpander.IsExpanded" />
@@ -132,14 +135,15 @@
 	<Grid Name="Base" ColumnDefinitions="*,*">
 		<!-- Input -->
 		<Border Grid.Column="0">
-			<Grid RowDefinitions="*,auto,auto">
-				<!-- Settings Only Modifiable Before Searching -->
-				<ScrollViewer Grid.Row="0">
-					<StackPanel IsEnabled="{Binding !OutputActive^}">
+			<ScrollViewer>
+				<Grid RowDefinitions="*,auto,auto">
+					<!-- Settings Only Modifiable Before Searching -->
+					<StackPanel Grid.Row="0" IsEnabled="{Binding !OutputActive^}">
 						<HeaderedContentControl Classes="input" Header="Base Directory">
 							<Grid ColumnDefinitions="*,auto">
 								<TextBox Classes="input-display"
 												 Text="{Binding Args.BaseDirectory.Value}" />
+
 								<Button Grid.Column="1" VerticalAlignment="Stretch" Content="Select"
 												Command="{Binding SelectBaseDirectory}" />
 							</Grid>
@@ -173,26 +177,26 @@
 											Command="{Binding Args.NewFileTypeGroup}" />
 						</StackPanel>
 					</StackPanel>
-				</ScrollViewer>
 
-				<!-- Settings Modifiable At All Times -->
-				<StackPanel Grid.Row="1">
-					<HeaderedContentControl Header="Output Directory">
-						<ContentControl Classes="rel-path" Content="{Binding Args.OutputDirectory}" />
-					</HeaderedContentControl>
-				</StackPanel>
+					<!-- Settings Modifiable At All Times -->
+					<StackPanel Grid.Row="1">
+						<HeaderedContentControl Header="Output Directory">
+							<ContentControl Classes="rel-path" Content="{Binding Args.OutputDirectory}" />
+						</HeaderedContentControl>
+					</StackPanel>
 
-				<!-- Button Ribbon -->
-				<StackPanel Grid.Row="2" Orientation="Horizontal">
-					<Button Content="Get Paths" Command="{Binding GetPaths}"
-									IsVisible="{Binding !OutputActive^}" />
+					<!-- Button Ribbon -->
+					<StackPanel Grid.Row="2" Orientation="Horizontal">
+						<Button Content="Get Paths" Command="{Binding GetPaths}"
+										IsVisible="{Binding !OutputActive^}" />
 
-					<Button Content="Clear Results" Command="{Binding ClearResults}"
-									IsVisible="{Binding OutputActive^}" />
-					<Button Content="Copy Results" Command="{Binding CopyResults}"
-									IsVisible="{Binding OutputActive^}" />
-				</StackPanel>
-			</Grid>
+						<Button Content="Clear Results" Command="{Binding ClearResults}"
+										IsVisible="{Binding OutputActive^}" />
+						<Button Content="Copy Results" Command="{Binding CopyResults}"
+										IsVisible="{Binding OutputActive^}" />
+					</StackPanel>
+				</Grid>
+			</ScrollViewer>
 		</Border>
 
 		<!-- Output -->
