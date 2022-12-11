@@ -36,6 +36,7 @@
 			<Setter Property="Content" Value="X" />
 			<Setter Property="Foreground" Value="Red" />
 			<Setter Property="VerticalAlignment" Value="Top" />
+			<Setter Property="Margin" Value="0,2,0,2" />
 		</Style>
 
 		<!-- Readonly display of a value -->
