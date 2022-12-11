@@ -35,10 +35,10 @@ public sealed class MainWindowViewModel : ViewModelBase
 	public ReactiveCommand<Unit, Unit> SelectBaseDirectory { get; }
 	#endregion Commands
 
-	public MainWindowViewModel(Window window, GetAllReferencedPaths.Arguments args)
+	public MainWindowViewModel(Window window, ArgumentsViewModel args)
 	{
 		_Window = window;
-		Args = new(args);
+		Args = args;
 
 		ClearResults = ReactiveCommand.CreateFromTask(ClearResultsAsync);
 		CopyFiles = ReactiveCommand.CreateFromTask(CopyFilesAsync);
