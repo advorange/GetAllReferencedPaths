@@ -177,14 +177,16 @@
 
 					<!-- After Searching -->
 					<StackPanel IsVisible="{Binding !GetPaths.IsExecuting^}">
-						<TextBlock>
-							<TextBlock.Text>
-								<MultiBinding StringFormat="Completed! Found {0} files in {1:N3} seconds.">
-									<Binding Path="Results.Found" />
-									<Binding Path="Results.EllapsedTime.TotalSeconds" />
-								</MultiBinding>
-							</TextBlock.Text>
-						</TextBlock>
+						<HeaderedContentControl Header="Completed!">
+							<TextBlock>
+								<TextBlock.Text>
+									<MultiBinding StringFormat="Found {0} files in {1:N3} seconds.">
+										<Binding Path="Results.Found" />
+										<Binding Path="Results.EllapsedTime.TotalSeconds" />
+									</MultiBinding>
+								</TextBlock.Text>
+							</TextBlock>
+						</HeaderedContentControl>
 					</StackPanel>
 
 					<!-- Output Display -->
