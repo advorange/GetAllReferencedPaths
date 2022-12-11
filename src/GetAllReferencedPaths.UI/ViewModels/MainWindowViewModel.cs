@@ -19,19 +19,17 @@ public sealed class MainWindowViewModel : ViewModelBase
 {
 	private readonly Window _Window;
 
-	private SearchingViewModel _Searching = new();
+	private ResultsViewModel _Searching = new();
 
 	public ArgumentsViewModel Args { get; }
-	public SearchingViewModel Searching
+	public ResultsViewModel Results
 	{
 		get => _Searching;
 		set => this.RaiseAndSetIfChanged(ref _Searching, value);
 	}
 
 	#region Commands
-	public ReactiveCommand<Unit, Unit> AddRootDirectory { get; }
-	public ReactiveCommand<Unit, Unit> AddSourceFile { get; }
-	public ReactiveCommand<Unit, Unit> ClearPaths { get; }
+	public ReactiveCommand<Unit, Unit> ClearResults { get; }
 	public ReactiveCommand<Unit, Unit> CopyFiles { get; }
 	public ReactiveCommand<Unit, Unit> GetPaths { get; }
 	public ReactiveCommand<Unit, Unit> SelectBaseDirectory { get; }
@@ -42,29 +40,15 @@ public sealed class MainWindowViewModel : ViewModelBase
 		_Window = window;
 		Args = new(args);
 
-		AddRootDirectory = ReactiveCommand.CreateFromTask(AddRootDirectoryAsync);
-		AddSourceFile = ReactiveCommand.CreateFromTask(AddSourceFileAsync);
-		ClearPaths = ReactiveCommand.CreateFromTask(ClearPathsAsync);
+		ClearResults = ReactiveCommand.CreateFromTask(ClearResultsAsync);
 		CopyFiles = ReactiveCommand.CreateFromTask(CopyFilesAsync);
 		GetPaths = ReactiveCommand.CreateFromTask(GetPathsAsync);
 		SelectBaseDirectory = ReactiveCommand.CreateFromTask(SelectBaseDirectoryAsync);
 	}
 
-	private Task AddRootDirectoryAsync()
+	private Task ClearResultsAsync()
 	{
-		Args.AddRootDirectory();
-		return Task.CompletedTask;
-	}
-
-	private Task AddSourceFileAsync()
-	{
-		Args.AddSourceFile();
-		return Task.CompletedTask;
-	}
-
-	private Task ClearPathsAsync()
-	{
-		Searching = new();
+		Results = new();
 		return Task.CompletedTask;
 	}
 
@@ -92,7 +76,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 			}
 		}
 
-		CopyFiles(Searching.Output!);
+		CopyFiles(Results.Output!);
 		return Task.CompletedTask;
 	}
 
@@ -111,7 +95,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 			// to farthest
 			segments.Reverse();
 
-			var output = Searching.Output!;
+			var output = Results.Output!;
 			foreach (var segment in segments)
 			{
 				var subDir = output.Subdirectories
@@ -127,7 +111,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 		}
 
 		var args = RuntimeArguments.Create(Args.ToModel());
-		Searching = new()
+		Results = new()
 		{
 			Output = new(args.BaseDirectory),
 		};
@@ -137,14 +121,14 @@ public sealed class MainWindowViewModel : ViewModelBase
 		var filesToProcess = new Stack<FileInfo>(args.Sources);
 		while (filesToProcess.TryPop(out var file))
 		{
-			Searching.Remaining = filesToProcess.Count;
+			Results.Remaining = filesToProcess.Count;
 			if (!alreadyProcessed.Add(Path.GetFullPath(file.FullName)))
 			{
 				continue;
 			}
 
-			Searching.CurrentFile = file.FullName;
-			Searching.Found = alreadyProcessed.Count;
+			Results.CurrentFile = file.FullName;
+			Results.Found = alreadyProcessed.Count;
 			AddFileToTree(args.BaseDirectory, file);
 
 			foreach (var gatherer in args.Gatherers)
@@ -158,14 +142,14 @@ public sealed class MainWindowViewModel : ViewModelBase
 				foreach (var rootedFile in gatherer.RootFiles(file, result.Value))
 				{
 					filesToProcess.Push(rootedFile);
-					Searching.Remaining = filesToProcess.Count;
+					Results.Remaining = filesToProcess.Count;
 				}
 			}
 		}
 
 		sw.Stop();
-		Searching.EllapsedTime = sw.Elapsed;
-		Searching.CurrentFile = null;
+		Results.EllapsedTime = sw.Elapsed;
+		Results.CurrentFile = null;
 	}
 
 	private async Task SelectBaseDirectoryAsync()

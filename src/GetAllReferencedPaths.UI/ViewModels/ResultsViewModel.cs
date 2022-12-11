@@ -6,7 +6,7 @@ using System;
 
 namespace GetAllReferencedPaths.UI.ViewModels;
 
-public sealed class SearchingViewModel : ViewModelBase
+public sealed class ResultsViewModel : ViewModelBase
 {
 	private string? _CurrentlyProcessingFile;
 	private int _Found;

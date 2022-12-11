@@ -1,5 +1,8 @@
-﻿using System.Collections.ObjectModel;
+﻿using ReactiveUI;
+
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive;
 
 namespace GetAllReferencedPaths.UI.ViewModels.Arguments;
 
@@ -10,6 +13,11 @@ public sealed class ArgumentsViewModel : ViewModelBase
 	public RootDirectoryViewModel OutputDirectory { get; }
 	public ObservableCollection<RootDirectoryViewModel> RootDirectories { get; } = new();
 	public ObservableCollection<SourceFileViewModel> SourceFiles { get; } = new();
+
+	#region Commands
+	public ReactiveCommand<Unit, Unit> NewRootDirectory { get; }
+	public ReactiveCommand<Unit, Unit> NewSourceFile { get; }
+	#endregion Commands
 
 	public ArgumentsViewModel(GetAllReferencedPaths.Arguments args)
 	{
@@ -34,6 +42,9 @@ public sealed class ArgumentsViewModel : ViewModelBase
 			}
 			InterchangeableFileTypes.Add(list);
 		}
+
+		NewRootDirectory = ReactiveCommand.Create(() => AddRootDirectory());
+		NewSourceFile = ReactiveCommand.Create(() => AddSourceFile());
 	}
 
 	public void AddRootDirectory(string value = "")

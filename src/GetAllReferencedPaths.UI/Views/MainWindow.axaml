@@ -26,7 +26,7 @@
 			<Setter Property="Padding" Value="{DynamicResource BasePadding}" />
 		</Style>
 
-		<Style Selector=":is(Layoutable).input-option">
+		<Style Selector=":is(Layoutable).input">
 			<Setter Property="Margin" Value="{DynamicResource InputBigSpacer}" />
 		</Style>
 
@@ -74,8 +74,8 @@
 			<Grid RowDefinitions="*,auto,auto">
 				<!-- Settings Only Modifiable Before Searching -->
 				<ScrollViewer Grid.Row="0">
-					<StackPanel IsEnabled="{Binding !Searching.Found}">
-						<HeaderedContentControl Classes="input-option" Header="Base Directory">
+					<StackPanel IsEnabled="{Binding !Results.Found}">
+						<HeaderedContentControl Classes="input" Header="Base Directory">
 							<Grid ColumnDefinitions="*,auto">
 								<TextBox Text="{Binding Args.BaseDirectory.Value}" TextWrapping="NoWrap" />
 								<Button Grid.Column="1" VerticalAlignment="Stretch" Content="Select"
@@ -83,23 +83,23 @@
 							</Grid>
 						</HeaderedContentControl>
 
-						<StackPanel Classes="input-option">
+						<StackPanel Classes="input">
 							<HeaderedContentControl Header="Root Directories">
 								<controls:RelativePathsRepeater Items="{Binding Args.RootDirectories}" />
 							</HeaderedContentControl>
 
-							<Button Content="Add Root Directory" Command="{Binding AddRootDirectory}" />
+							<Button Content="Add Root Directory" Command="{Binding Args.NewRootDirectory}" />
 						</StackPanel>
 
-						<StackPanel Classes="input-option">
+						<StackPanel Classes="input">
 							<HeaderedContentControl Header="Source Files">
 								<controls:RelativePathsRepeater Items="{Binding Args.SourceFiles}" />
 							</HeaderedContentControl>
 
-							<Button Content="Add Source File" Command="{Binding AddSourceFile}" />
+							<Button Content="Add Source File" Command="{Binding Args.NewSourceFile}" />
 						</StackPanel>
 
-						<HeaderedContentControl Classes="input-option" Header="Interchangeable File Types">
+						<HeaderedContentControl Classes="input" Header="Interchangeable File Types">
 							<ItemsRepeater Items="{Binding Args.InterchangeableFileTypes}">
 								<ItemsRepeater.Layout>
 									<StackLayout Spacing="{DynamicResource InputSmallSpacer}" />
@@ -135,9 +135,9 @@
 				<!-- Button Ribbon -->
 				<UniformGrid Grid.Row="2" Rows="1">
 					<Button Content="Get Paths" Command="{Binding GetPaths}"
-									IsVisible="{Binding !Searching.Found}" />
-					<Button Content="Clear Paths" Command="{Binding ClearPaths}"
-									IsVisible="{Binding Searching.Found}" />
+									IsVisible="{Binding !Results.Found}" />
+					<Button Content="Clear Results" Command="{Binding ClearResults}"
+									IsVisible="{Binding Results.Found}" />
 				</UniformGrid>
 			</Grid>
 		</Border>
@@ -145,18 +145,18 @@
 		<!-- Output -->
 		<Border Grid.Column="1">
 			<ScrollViewer>
-				<StackPanel IsVisible="{Binding Searching.Found}">
+				<StackPanel IsVisible="{Binding Results.Found}">
 					<!-- While Searching -->
 					<StackPanel IsVisible="{Binding GetPaths.IsExecuting^}">
 						<HeaderedContentControl Header="Currently Processing File">
-							<TextBlock Text="{Binding Searching.CurrentFile}" />
+							<TextBlock Text="{Binding Results.CurrentFile}" />
 						</HeaderedContentControl>
 
 						<UniformGrid Rows="1">
 							<HeaderedContentControl Header="Found">
 								<TextBlock>
 									<TextBlock.Text>
-										<Binding Path="Searching.Found" StringFormat="​{0} Files" />
+										<Binding Path="Results.Found" StringFormat="​{0} Files" />
 									</TextBlock.Text>
 								</TextBlock>
 							</HeaderedContentControl>
@@ -164,7 +164,7 @@
 							<HeaderedContentControl Header="Remaining To Check">
 								<TextBlock>
 									<TextBlock.Text>
-										<Binding Path="Searching.Remaining" StringFormat="​{0} Files" />
+										<Binding Path="Results.Remaining" StringFormat="​{0} Files" />
 									</TextBlock.Text>
 								</TextBlock>
 							</HeaderedContentControl>
@@ -176,15 +176,15 @@
 						<TextBlock>
 							<TextBlock.Text>
 								<MultiBinding StringFormat="Completed! Found {0} files in {1:N3} seconds.">
-									<Binding Path="Searching.Found" />
-									<Binding Path="Searching.EllapsedTime.TotalSeconds" />
+									<Binding Path="Results.Found" />
+									<Binding Path="Results.EllapsedTime.TotalSeconds" />
 								</MultiBinding>
 							</TextBlock.Text>
 						</TextBlock>
 					</StackPanel>
 
 					<!-- Output Display -->
-					<TreeView Items="{Binding Searching.Output.Items}">
+					<TreeView Items="{Binding Results.Output.Items}">
 						<TreeView.Styles>
 							<Style Selector="TreeViewItem">
 								<Setter Property="IsExpanded" Value="True" />
