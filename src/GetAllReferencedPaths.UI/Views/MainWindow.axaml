@@ -34,8 +34,8 @@
 		<Style Selector="Button.delete">
 			<Setter Property="Content" Value="X" />
 			<Setter Property="Foreground" Value="Red" />
-			<Setter Property="VerticalAlignment" Value="Stretch" />
-			<Setter Property="VerticalContentAlignment" Value="Stretch" />
+			<Setter Property="VerticalAlignment" Value="Top" />
+			<Setter Property="BorderThickness" Value="1" />
 		</Style>
 
 		<Style Selector="TextBox.input-display">
@@ -44,20 +44,33 @@
 			<Setter Property="TextWrapping" Value="Wrap" />
 		</Style>
 
-		<Style Selector="Expander#rExpander">
+		<Style Selector="Expander.input-display">
 			<Setter Property="Padding" Value="0" />
 			<Setter Property="MinHeight" Value="0" />
 			<Setter Property="HorizontalAlignment" Value="Stretch" />
 		</Style>
 
-		<Style Selector="Expander#rExpander ToggleButton#ExpanderHeader">
+		<Style Selector="Expander.input-display ToggleButton#ExpanderHeader">
 			<Setter Property="Padding" Value="0" />
+		</Style>
+
+		<Style Selector="Expander.input-display ToggleButton#ExpanderHeader Grid Border">
+			<Setter Property="Margin" Value="0" />
+		</Style>
+
+		<Style Selector="Expander.input-display:expanded /template/ ToggleButton#ExpanderHeader">
+			<Setter Property="BorderThickness" Value="0" />
+		</Style>
+
+		<Style Selector="Expander.input-display:expanded /template/ Border#ExpanderContent">
+			<Setter Property="BorderThickness" Value="0" />
+			<Setter Property="Background" Value="Transparent" />
 		</Style>
 
 		<Style Selector=":is(ItemsRepeater).file-types ContentControl#Content">
 			<Setter Property="ContentTemplate">
 				<DataTemplate>
-					<Expander Name="rExpander">
+					<Expander Classes="input-display">
 						<Expander.Header>
 							<Grid ColumnDefinitions="*,auto">
 								<TextBox Grid.Column="0" Classes="input-display"
@@ -88,7 +101,7 @@
 		<Style Selector=":is(ItemsRepeater).rel-paths ContentControl#Content, ContentControl.rel-path">
 			<Setter Property="ContentTemplate">
 				<DataTemplate>
-					<Expander Name="rExpander">
+					<Expander Classes="input-display" Name="rExpander">
 						<Expander.IsExpanded>
 							<MultiBinding Converter="{x:Static BoolConverters.Or}">
 								<Binding Path="#rExpander.IsExpanded" />

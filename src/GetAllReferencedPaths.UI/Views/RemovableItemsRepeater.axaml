@@ -8,7 +8,7 @@
 	<ItemsRepeater.ItemTemplate>
 		<DataTemplate>
 			<Grid ColumnDefinitions="auto,*">
-				<Button Grid.Column="0" Classes="delete"
+				<Button Grid.Column="0" Name="DeleteButton" Classes="delete"
 								Command="{Binding #Me.RemoveItem}"
 								CommandParameter="{Binding}" />
 
