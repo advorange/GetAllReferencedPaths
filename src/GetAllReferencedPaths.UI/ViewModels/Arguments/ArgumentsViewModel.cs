@@ -92,7 +92,7 @@ public sealed class ArgumentsViewModel : ViewModelBase
 		=> RootDirectories.Add(new(BaseDirectory, value));
 
 	public void AddSourceFile(string value = "")
-		=> SourceFiles.Add(new(BaseDirectory, RootDirectories, value));
+		=> SourceFiles.Add(new(BaseDirectory, RootDirectories, InterchangeableFileTypes, value));
 
 	public void Save(string path)
 	{

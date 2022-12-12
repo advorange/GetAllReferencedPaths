@@ -10,7 +10,17 @@ namespace GetAllReferencedPaths.UI.ViewModels.Arguments;
 
 public sealed class FileTypeGroupViewModel : ObservableCollection<StringWrapper>
 {
-	public string Display { get; private set; } = "";
+	private string _Display = "";
+
+	public string Display
+	{
+		get => _Display;
+		private set
+		{
+			_Display = value;
+			OnPropertyChanged(new(nameof(Display)));
+		}
+	}
 
 	public FileTypeGroupViewModel()
 	{
@@ -24,10 +34,6 @@ public sealed class FileTypeGroupViewModel : ObservableCollection<StringWrapper>
 					.Where(x => !string.IsNullOrWhiteSpace(x));
 				return string.Join(", ", values);
 			})
-			.Subscribe(x =>
-			{
-				Display = x;
-				OnPropertyChanged(new(nameof(Display)));
-			});
+			.Subscribe(x => Display = x);
 	}
 }

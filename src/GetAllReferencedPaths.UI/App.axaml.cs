@@ -1,6 +1,5 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Controls.Shapes;
 using Avalonia.Markup.Xaml;
 
 using GetAllReferencedPaths.UI.ViewModels;

@@ -9,8 +9,9 @@ public sealed class RootDirectoryViewModel : PathCollectionViewModel
 	public RootDirectoryViewModel(StringWrapper baseDirectory, string value)
 		: base(value)
 	{
-		var dirChange = baseDirectory.WhenAnyValue(x => x.Value);
-		BindToPaths(dirChange, (val, dir) =>
+		var directoryChanged = baseDirectory
+			.WhenAnyValue(x => x.Value);
+		BindToPaths(directoryChanged, (val, dir) =>
 		{
 			return new[] { PathViewModel.FromDirectory(Path.Combine(dir, val)) };
 		});

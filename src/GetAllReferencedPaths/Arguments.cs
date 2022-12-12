@@ -28,27 +28,7 @@ public record RuntimeArguments(
 			.Select(x => new DirectoryInfo(x))
 			.ToImmutableArray();
 		var sources = args.SourceFiles
-			.SelectMany(x =>
-			{
-				var sources = new HashSet<string>()
-				{
-					x
-				};
-
-				var fileExtension = Path.GetExtension(x);
-				foreach (var extensions in args.InterchangeableFileTypes)
-				{
-					if (extensions.Contains(fileExtension))
-					{
-						foreach (var extension in extensions)
-						{
-							sources.Add(Path.ChangeExtension(x, extension));
-						}
-					}
-				}
-
-				return sources;
-			})
+			.SelectMany(x => args.InterchangeableFileTypes.InterchangeFileTypes(x))
 			.SelectMany(x => roots.RootFile(x))
 			.ToImmutableArray();
 		var baseDirectory = new DirectoryInfo(

@@ -105,7 +105,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 			);
 
 			Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
-			await UIUtils.CopyFileAsync(file.Info.FullName, destination).ConfigureAwait(true);
+			await FileUtils.CopyFileAsync(file.Info.FullName, destination).ConfigureAwait(true);
 			file.IsCopied = true;
 		}
 	}
