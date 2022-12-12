@@ -46,6 +46,8 @@ public sealed class SourceFileViewModel : PathCollectionViewModel
 			return fileTypes
 				.InterchangeFileTypes(val)
 				.SelectMany(x => roots.RootFile(x, existingFilesOnly: false))
+				.OrderBy(x => x.DirectoryName)
+				.ThenBy(x => x.Name)
 				.Select(f => PathViewModel.FromFile(f.FullName))
 				.ToList();
 		});
