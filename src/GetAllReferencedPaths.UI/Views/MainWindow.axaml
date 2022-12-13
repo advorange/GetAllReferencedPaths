@@ -249,23 +249,38 @@
 							<Style Selector="TreeViewItem">
 								<Setter Property="IsExpanded" Value="True" />
 							</Style>
+
+							<Style Selector="ContentControl">
+								<Setter Property="ContentTemplate">
+									<Setter.Value>
+										<DataTemplate>
+											<StackPanel Orientation="Horizontal">
+												<TextBlock VerticalAlignment="Center" Text="{Binding}" />
+
+												<CheckBox IsHitTestVisible="False" Margin="5,0,0,0"
+																	IsChecked="{Binding $parent[TreeViewItem].DataContext.IsCopied}" />
+											</StackPanel>
+										</DataTemplate>
+									</Setter.Value>
+								</Setter>
+							</Style>
 						</TreeView.Styles>
 
 						<TreeView.DataTemplates>
 							<TreeDataTemplate DataType="output:DirectoryViewModel"
 																ItemsSource="{Binding Items}">
-								<TextBlock Text="{Binding Info.Name}" />
+								<ContentControl Content="{Binding Info.Name}" />
 							</TreeDataTemplate>
 
 							<DataTemplate DataType="output:FileViewModel">
-								<TextBlock Background="{Binding IsCopied, Converter={x:Static conv:BrushConverters.FileExists}}">
-									<TextBlock.Text>
+								<ContentControl>
+									<ContentControl.Content>
 										<MultiBinding StringFormat="​{0} ({1:N0} bytes)">
 											<Binding Path="Info.Name" />
 											<Binding Path="Info.Length" />
 										</MultiBinding>
-									</TextBlock.Text>
-								</TextBlock>
+									</ContentControl.Content>
+								</ContentControl>
 							</DataTemplate>
 						</TreeView.DataTemplates>
 					</TreeView>

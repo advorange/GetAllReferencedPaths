@@ -1,19 +1,19 @@
-﻿using ReactiveUI;
-
+﻿using System;
 using System.IO;
 
 namespace GetAllReferencedPaths.UI.ViewModels.Arguments;
 
 public sealed class RootDirectoryViewModel : PathCollectionViewModel
 {
-	public RootDirectoryViewModel(StringWrapper baseDirectory, string value)
+	public RootDirectoryViewModel(IObservable<string> baseDirectory, string value)
 		: base(value)
 	{
-		var directoryChanged = baseDirectory
-			.WhenAnyValue(x => x.Value);
-		BindToPaths(directoryChanged, (val, dir) =>
+		BindToPaths(baseDirectory, (value, directory) =>
 		{
-			return new[] { PathViewModel.FromDirectory(Path.Combine(dir, val)) };
+			return new[]
+			{
+				PathViewModel.FromDirectory(Path.Combine(directory, value))
+			};
 		});
 	}
 }

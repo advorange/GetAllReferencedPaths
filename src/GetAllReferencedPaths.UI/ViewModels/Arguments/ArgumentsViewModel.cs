@@ -1,5 +1,10 @@
-﻿using ReactiveUI;
+﻿using DynamicData;
+using DynamicData.Binding;
 
+using ReactiveUI;
+
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -18,6 +23,10 @@ public sealed class ArgumentsViewModel : ViewModelBase
 		WriteIndented = true,
 	};
 
+	private readonly IObservable<string> _BaseDirectoryChanged;
+	private readonly IObservable<List<HashSet<string>>> _FileTypesChanged;
+	private readonly IObservable<List<DirectoryInfo>> _RootsChanged;
+
 	public StringWrapper BaseDirectory { get; }
 	public ObservableCollection<FileTypeGroupViewModel> InterchangeableFileTypes { get; } = new();
 	public RootDirectoryViewModel OutputDirectory { get; }
@@ -34,16 +43,10 @@ public sealed class ArgumentsViewModel : ViewModelBase
 	public ArgumentsViewModel(Args args)
 	{
 		BaseDirectory = new(args.BaseDirectory);
-		OutputDirectory = new(BaseDirectory, args.OutputDirectory);
+		_BaseDirectoryChanged = BaseDirectory
+			.WhenAnyValue(x => x.Value);
 
-		foreach (var item in args.RootDirectories)
-		{
-			AddRootDirectory(item);
-		}
-		foreach (var item in args.SourceFiles)
-		{
-			AddSourceFile(item);
-		}
+		OutputDirectory = new(_BaseDirectoryChanged, args.OutputDirectory);
 
 		foreach (var set in args.InterchangeableFileTypes)
 		{
@@ -53,6 +56,37 @@ public sealed class ArgumentsViewModel : ViewModelBase
 				list.Add(new(item));
 			}
 			InterchangeableFileTypes.Add(list);
+		}
+		_FileTypesChanged = InterchangeableFileTypes
+			.ToObservableChangeSet()
+			.AutoRefresh(x => x.Display)
+			.ToCollection()
+			.Select(x =>
+			{
+				return x
+					.Select(g => g.Select(e => e.Value).ToHashSet())
+					.ToList();
+			});
+
+		foreach (var item in args.RootDirectories)
+		{
+			AddRootDirectory(item);
+		}
+		_RootsChanged = RootDirectories
+			.ToObservableChangeSet()
+			.AutoRefresh(x => x.Paths)
+			.ToCollection()
+			.Select(x =>
+			{
+				return x
+					.SelectMany(r => r.Paths.Select(p => new DirectoryInfo(p.Path)))
+					.Prepend(new(BaseDirectory.Value))
+					.ToList();
+			});
+
+		foreach (var item in args.SourceFiles)
+		{
+			AddSourceFile(item);
 		}
 
 		NewRootDirectory = ReactiveCommand.Create(() => AddRootDirectory());
@@ -89,10 +123,10 @@ public sealed class ArgumentsViewModel : ViewModelBase
 	}
 
 	public void AddRootDirectory(string value = "")
-		=> RootDirectories.Add(new(BaseDirectory, value));
+		=> RootDirectories.Add(new(_BaseDirectoryChanged, value));
 
 	public void AddSourceFile(string value = "")
-		=> SourceFiles.Add(new(BaseDirectory, RootDirectories, InterchangeableFileTypes, value));
+		=> SourceFiles.Add(new(_RootsChanged, _FileTypesChanged, value));
 
 	public void Save(string path)
 	{

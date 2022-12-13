@@ -68,17 +68,18 @@ public sealed class MainWindowViewModel : ViewModelBase
 
 	private async Task CopyResultsAsync()
 	{
-		static IEnumerable<FileViewModel> EnumerateFiles(DirectoryViewModel dir)
+		static IEnumerable<IFileSystemInfoViewModel> EnumerateEntries(DirectoryViewModel dir)
 		{
 			foreach (var file in dir.Files)
 			{
 				yield return file;
 			}
+			yield return dir;
 			foreach (var subdir in dir.Subdirectories)
 			{
-				foreach (var file in EnumerateFiles(subdir))
+				foreach (var item in EnumerateEntries(subdir))
 				{
-					yield return file;
+					yield return item;
 				}
 			}
 		}
@@ -86,27 +87,31 @@ public sealed class MainWindowViewModel : ViewModelBase
 		var baseDir = Args.BaseDirectory.Value!;
 		var outDir = Args.OutputDirectory.Value!;
 		var time = DateTime.Now.ToString("s").Replace(':', '.')!;
-		var files = EnumerateFiles(Results.Output!).ToList();
+		var entries = EnumerateEntries(Results.Output!).ToList();
 
 		// reset each IsCopied to false in case the user clicks copy multiple times
 		// otherwise if 1st copy is successful but subsequent ones arent the
 		// failed copies will look successful
-		foreach (var file in files)
+		foreach (var entry in entries)
 		{
-			file.IsCopied = false;
+			entry.IsCopied = false;
 		}
-		foreach (var file in files)
+		foreach (var entry in entries)
 		{
-			var destination = Path.Combine(
-				baseDir,
-				outDir,
-				time,
-				file.Relative
-			);
+			if (entry is FileViewModel file)
+			{
+				var destination = Path.Combine(
+					baseDir,
+					outDir,
+					time,
+					file.Relative
+				);
 
-			Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
-			await FileUtils.CopyFileAsync(file.Info.FullName, destination).ConfigureAwait(true);
-			file.IsCopied = true;
+				Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+				await FileUtils.CopyFileAsync(file.Info.FullName, destination).ConfigureAwait(true);
+			}
+
+			entry.IsCopied = true;
 		}
 	}
 
